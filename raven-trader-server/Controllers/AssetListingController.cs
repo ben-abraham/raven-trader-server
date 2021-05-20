@@ -56,41 +56,44 @@ namespace raven_trader_server.Controllers
 
                             dynamic parsed_tx = parse_test;
 
-                            var utxo = $"{parsed_tx.vin[0].txid}|{parsed_tx.vin[0].vout}";
-                            var type = parsed_tx.vout[0].type == "transfer_asset" ? SwapType.Buy : SwapType.Sell;
-
-                            //TODO: Use local txindex to query transactions
-                            var src_transaction = (dynamic)Utils.FullExternalTXDecode((string)parsed_tx.vin[0].txid);
-                            var src_vout = src_transaction.vout[(int)parsed_tx.vin[0].vout];
-
-                            var existing = _db.Find<ListingEntry>(utxo);
-                            if (existing != null)
-                                entry = existing;
-                            else
+                            if (parsed_tx.vin[0]?.scriptSig?.asm?.Contains(Constants.SINGLE_ANYONECANPAY))
                             {
-                                entry = new ListingEntry() { UTXO = utxo };
-                                _db.Listings.Add(entry);
-                            }
-                            
-                            entry.B64SignedPartial = Convert.ToBase64String(Utils.StringToByteArray(listing.Hex));
-                            entry.OrderType = type;
+                                var utxo = $"{parsed_tx.vin[0].txid}|{parsed_tx.vin[0].vout}";
+                                var type = parsed_tx.vout[0].type == Constants.VOUT_TYPE_TRANSFER_ASSET ? SwapType.Buy : SwapType.Sell;
 
-                            switch (entry.OrderType)
-                            {
-                                case SwapType.Buy:
-                                    //For a buy order, the quantity is the amount being requested
-                                    entry.Quantity = parsed_tx.vout[0].scriptPubKey.asset.amount;
-                                    entry.AssetName = parsed_tx.vout[0].scriptPubKey.asset.name;
-                                    entry.UnitPrice = src_vout.amount / entry.Quantity;
-                                    break;
-                                case SwapType.Sell:
-                                    entry.Quantity = src_vout.scriptPubKey.asset.amount;
-                                    entry.AssetName = src_vout.scriptPubKey.asset.name;
-                                    entry.UnitPrice = parsed_tx.vout[0].value / entry.Quantity;
-                                    break;
-                            }
+                                //var src_transaction = (dynamic)Utils.FullExternalTXDecode((string)parsed_tx.vin[0].txid);
+                                var src_transaction = (dynamic)_rpc.GetRawTransaction((string)parsed_tx.vin[0].txid);
+                                var src_vout = src_transaction.vout[(int)parsed_tx.vin[0].vout];
 
-                            _db.SaveChanges();
+                                var existing = _db.Find<ListingEntry>(utxo);
+                                if (existing != null)
+                                    entry = existing;
+                                else
+                                {
+                                    entry = new ListingEntry() { UTXO = utxo };
+                                    _db.Listings.Add(entry);
+                                }
+
+                                entry.B64SignedPartial = Convert.ToBase64String(Utils.StringToByteArray(listing.Hex));
+                                entry.OrderType = type;
+
+                                switch (entry.OrderType)
+                                {
+                                    case SwapType.Buy:
+                                        //For a buy order, the quantity is the amount being requested
+                                        entry.Quantity = parsed_tx.vout[0].scriptPubKey.asset.amount;
+                                        entry.AssetName = parsed_tx.vout[0].scriptPubKey.asset.name;
+                                        entry.UnitPrice = src_vout.amount / entry.Quantity;
+                                        break;
+                                    case SwapType.Sell:
+                                        entry.Quantity = src_vout.scriptPubKey.asset.amount;
+                                        entry.AssetName = src_vout.scriptPubKey.asset.name;
+                                        entry.UnitPrice = parsed_tx.vout[0].value / entry.Quantity;
+                                        break;
+                                }
+
+                                _db.SaveChanges();
+                            }
                         }
                     }
                 }
@@ -112,39 +115,42 @@ namespace raven_trader_server.Controllers
                 {
                     dynamic parsed_tx = parse_test;
 
-                    var utxo = $"{parsed_tx.vin[0].txid}|{parsed_tx.vin[0].vout}";
-                    var type = parsed_tx.vout[0].type == "transfer_asset" ? SwapType.Buy : SwapType.Sell;
-
-                    //TODO: Use local txindex to query transactions
-                    var src_transaction = (dynamic)Utils.FullExternalTXDecode((string)parsed_tx.vin[0].txid);
-                    var src_vout = src_transaction.vout[(int)parsed_tx.vin[0].vout];
-
-                    ListingEntry entry = new ListingEntry();
-
-                    entry.B64SignedPartial = Convert.ToBase64String(Utils.StringToByteArray(listing.Hex));
-                    entry.OrderType = type;
-                    entry.UTXO = utxo;
-
-                    switch (entry.OrderType)
+                    if (parsed_tx.vin[0]?.scriptSig?.asm?.Contains(Constants.SINGLE_ANYONECANPAY))
                     {
-                        case SwapType.Buy:
-                            //For a buy order, the quantity is the amount being requested
-                            entry.Quantity = parsed_tx.vout[0].scriptPubKey.asset.amount;
-                            entry.AssetName = parsed_tx.vout[0].scriptPubKey.asset.name;
-                            entry.UnitPrice = src_vout.amount / entry.Quantity;
-                            break;
-                        case SwapType.Sell:
-                            entry.Quantity = src_vout.scriptPubKey.asset.amount;
-                            entry.AssetName = src_vout.scriptPubKey.asset.name;
-                            entry.UnitPrice = parsed_tx.vout[0].value / entry.Quantity;
-                            break;
+                        var utxo = $"{parsed_tx.vin[0].txid}|{parsed_tx.vin[0].vout}";
+                        var type = parsed_tx.vout[0].type == Constants.VOUT_TYPE_TRANSFER_ASSET ? SwapType.Buy : SwapType.Sell;
+
+                        //var src_transaction = (dynamic)Utils.FullExternalTXDecode((string)parsed_tx.vin[0].txid);
+                        var src_transaction = (dynamic)_rpc.GetRawTransaction((string)parsed_tx.vin[0].txid);
+                        var src_vout = src_transaction.vout[(int)parsed_tx.vin[0].vout];
+
+                        ListingEntry entry = new ListingEntry();
+
+                        entry.B64SignedPartial = Convert.ToBase64String(Utils.StringToByteArray(listing.Hex));
+                        entry.OrderType = type;
+                        entry.UTXO = utxo;
+
+                        switch (entry.OrderType)
+                        {
+                            case SwapType.Buy:
+                                //For a buy order, the quantity is the amount being requested
+                                entry.Quantity = parsed_tx.vout[0].scriptPubKey.asset.amount;
+                                entry.AssetName = parsed_tx.vout[0].scriptPubKey.asset.name;
+                                entry.UnitPrice = src_vout.amount / entry.Quantity;
+                                break;
+                            case SwapType.Sell:
+                                entry.Quantity = src_vout.scriptPubKey.asset.amount;
+                                entry.AssetName = src_vout.scriptPubKey.asset.name;
+                                entry.UnitPrice = parsed_tx.vout[0].value / entry.Quantity;
+                                break;
+                        }
+
+                        return new JsonResult(new
+                        {
+                            valid = true,
+                            result = entry
+                        });
                     }
-
-                    return new JsonResult(new
-                    {
-                        valid = true,
-                        result = entry
-                    });
                 }
             }
 

@@ -19,7 +19,7 @@ namespace raven_trader_server.Models
             var vin_asm = DecodedTransaction.vin?[0]?.scriptSig?.asm?.ToString();
 
             if (vin_asm == null) return false;
-            if (!vin_asm.Contains("[SINGLE|ANYONECANPAY]")) return false;
+            if (!vin_asm.Contains(Constants.SINGLE_ANYONECANPAY)) return false;
 
             //Ins/Outs of the person who setup the swap
             var swap_setup_vin = DecodedTransaction.vin[0];
@@ -33,7 +33,7 @@ namespace raven_trader_server.Models
             {
                 var tx_vin = DecodedTransaction.vin[vin_idx];
 
-                if (tx_vin.scriptSig?.asm?.ToString()?.Contains("[SINGLE|ANYONECANPAY]"))
+                if (tx_vin.scriptSig?.asm?.ToString()?.Contains(Constants.SINGLE_ANYONECANPAY))
                 {
                     //If we see [SINGLE|ANYONECANPAY] in anything other than the first vin, this is a complex swap. skip for now.
                     return false;
@@ -49,10 +49,10 @@ namespace raven_trader_server.Models
             float quantity, unitPrice;
             string assetName;
 
-            if(swap_setup_vout?.scriptPubKey?.type == "transfer_asset")//Setup party wanted assets
+            if(swap_setup_vout?.scriptPubKey?.type == Constants.VOUT_TYPE_TRANSFER_ASSET)//Setup party wanted assets
             {
                 
-                if(swap_setup_src_vout?.scriptPubKey?.type == "transfer_asset")//Setup party provided assets
+                if(swap_setup_src_vout?.scriptPubKey?.type == Constants.VOUT_TYPE_TRANSFER_ASSET)//Setup party provided assets
                 {
                     swapType = SwapType.Exchange;
 
@@ -69,7 +69,7 @@ namespace raven_trader_server.Models
             }
             else//Setup party wanted RVN
             {
-                if (swap_setup_src_vout?.scriptPubKey?.type == "transfer_asset") //Setup party provided assets, so it's a sell
+                if (swap_setup_src_vout?.scriptPubKey?.type == Constants.VOUT_TYPE_TRANSFER_ASSET) //Setup party provided assets, so it's a sell
                 {
                     swapType = SwapType.Sell;
 
