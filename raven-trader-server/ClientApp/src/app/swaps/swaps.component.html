@@ -1,0 +1,42 @@
+<h1>Swap Listings</h1>
+
+<div class="row">
+
+  <div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+
+        <div style="float: right">
+          <!-- TODO: Name/Type filtering -->
+        </div>
+
+        <div class="table-responsive">
+          <span *ngIf="!results">
+            Loading...
+          </span>
+
+          <table class="table table-hover" *ngIf="results">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let swap of results.swaps">
+                <td>{{ swap.assetName }}</td>
+                <td>{{ swap.quantity }}</td>
+                <td>{{ swap.unitPrice }} RVN</td>
+                <td>{{ swap.unitPrice * swap.quantity }} RVN</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+

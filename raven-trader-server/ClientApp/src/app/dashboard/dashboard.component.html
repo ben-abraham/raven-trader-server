@@ -1,0 +1,76 @@
+<h1>Dashboard</h1>
+
+<div class="row">
+
+  <div class="col-lg-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+
+        <h4 style="float: left" class="card-title">Top Asset Movers</h4>
+        <div style="float: right">
+          <span style="margin-right: 5px">Show Admin</span>
+          <input class="card-title" type="checkbox" [(ngModel)]="showAdmin"/>
+        </div>
+        
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Total Supply</th>
+                <th>24h Volume</th>
+                <th>24h Swaps</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let volEntry of assetVol">
+                <tr *ngIf="volEntry.AssetName.endsWith('!') ? showAdmin : true">
+                  <td>{{ volEntry.AssetName }}</td>
+                  <td>###</td>
+                  <td>{{ volEntry.TotalVolume }}</td>
+                  <td>{{ volEntry.SwapVolume }}</td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+
+        <h4 class="card-title">Recent Completed Swaps</h4>
+
+        <h5 *ngIf="!data || !data.recent_swaps">
+          Loading...
+        </h5>
+        <div class="table-responsive" *ngIf="data && swaps">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Block</th>
+                <th>Type</th>
+                <th>Order</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let swap of swaps">
+                <td>{{ swap.assetName }}</td>
+                <td>{{ swap.block }}</td>
+                <td>{{ swap.type == 0 ? "Buy" : "Sell" }}</td>
+                <td>{{ swap.quantity }}x @ {{ swap.unitPrice }} RVN ea.</td>
+                <td>{{ swap.unitPrice * swap.quantity }} RVN</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

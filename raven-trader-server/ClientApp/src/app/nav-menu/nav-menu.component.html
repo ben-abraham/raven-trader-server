@@ -1,0 +1,102 @@
+<!--
+<header>
+  <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <div class="container">
+      <a class="navbar-brand" [routerLink]="['/']">raven_trader_server</a>
+      <button class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target=".navbar-collapse"
+              aria-label="Toggle navigation"
+              [attr.aria-expanded]="isExpanded"
+              (click)="toggle()">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse"
+           [ngClass]="{ show: isExpanded }">
+        <ul class="navbar-nav flex-grow">
+          <li class="nav-item"
+              [routerLinkActive]="['link-active']"
+              [routerLinkActiveOptions]="{ exact: true }">
+            <a class="nav-link text-dark" [routerLink]="['/']">Home</a>
+          </li>
+          <li class="nav-item" [routerLinkActive]="['link-active']">
+            <a class="nav-link text-dark" [routerLink]="['/counter']">Counter</a>
+          </li>
+          <li class="nav-item" [routerLinkActive]="['link-active']">
+            <a class="nav-link text-dark" [routerLink]="['/fetch-data']">Fetch data</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+-->
+
+  <ul class="nav">
+    <li class="nav-item nav-category">
+      <span class="nav-link">Navigation</span>
+    </li>
+
+    <li class="nav-item menu-items"
+        [routerLinkActive]="['active']"
+        [routerLinkActiveOptions]="{ exact: true }">
+      <a class="nav-link" [routerLink]="['/']">
+        <span class="menu-icon">
+          <i class="mdi mdi-speedometer"></i>
+        </span>
+        <span class="menu-title">Dashboard</span>
+      </a>
+    </li>
+
+    <li class="nav-item menu-items" [routerLinkActive]="['active']">
+      <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+        <span class="menu-icon">
+          <i class="mdi mdi-format-list-bulleted-type"></i>
+        </span>
+        <span class="menu-title">Assets</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="ui-basic">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item" [routerLinkActive]="['active']"> <a class="nav-link" [routerLink]="['/assets/all']">All</a></li>
+          <li class="nav-item" [routerLinkActive]="['active']"> <a class="nav-link" [routerLink]="['/assets/volume']">Volume</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="nav-item menu-items">
+      <a class="nav-link" [routerLink]="['/swaps']">
+        <span class="menu-icon">
+          <i class="mdi mdi-swap-horizontal"></i>
+        </span>
+        <span class="menu-title">Active Swaps</span>
+      </a>
+    </li>
+
+    <li class="nav-item menu-items">
+      <a class="nav-link" href="#" data-toggle="modal" data-target="#addSwapModal">
+        <span class="menu-icon">
+          <i class="mdi mdi-library-plus"></i>
+        </span>
+        <span class="menu-title">Add a Swap</span>
+      </a>
+    </li>
+
+    <li class="nav-item menu-items" [routerLinkActive]="['active']">
+      <a class="nav-link" data-toggle="collapse" href="#git-link" aria-expanded="false" aria-controls="ui-basic">
+        <span class="menu-icon">
+          <i class="mdi mdi-github-circle"></i>
+        </span>
+        <span class="menu-title">Github</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="git-link">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item" [routerLinkActive]="['active']"> <a class="nav-link" href="https://github.com/ben-abraham/raven-trader-pro" target="_blank">Client</a></li>
+          <li class="nav-item" [routerLinkActive]="['active']"> <a class="nav-link" href="https://github.com/ben-abraham/raven-trader-server" target="_blank">Server</a></li>
+        </ul>
+      </div>
+    </li>
+
+  </ul>

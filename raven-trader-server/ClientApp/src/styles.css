@@ -1,0 +1,30 @@
+
+.logo-text-a {
+  color: rgb(247, 149, 52);
+}
+
+.logo-text-b {
+  color: rgb(240, 82, 57);
+}
+
+.logo-text-large {
+  font-size: xx-large;
+  font-weight: bolder;
+}
+
+.form-control-greytext {
+  display: block;
+  width: 100%;
+  padding: 0.56rem 0;
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  line-height: 1;
+  color: #808080;
+  background-color: transparent;
+  border: solid transparent;
+  border-width: 1px 0;
+}
+
+.signed-partial-input {
+  background-color: white !important;
+}

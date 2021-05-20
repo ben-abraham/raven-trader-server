@@ -1,0 +1,117 @@
+<body>
+  <div class="container-scroller">
+    <nav class="sidebar sidebar-offcanvas" id="sidebar">
+      <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+        <a class="sidebar-brand brand-logo" [routerLink]="['/']">
+          <span class="logo-text-a">Raven </span>
+          <span class="logo-text-b">Trader</span>
+        </a>
+      </div>
+
+      <app-nav-menu></app-nav-menu>
+    </nav>
+
+    <div class="container-fluid page-body-wrapper">
+
+      <nav class="navbar p-0 fixed-top d-flex flex-row">
+        <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+          <a class="navbar-brand brand-logo-mini" [routerLink]="['/']">
+            <span class="logo-text logo-text-large">RT</span>
+          </a>
+        </div>
+        <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+          <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+            <span class="mdi mdi-menu"></span>
+          </button>
+          <ul class="navbar-nav w-100">
+            <li class="nav-item w-100">
+              <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search">
+                <input type="text" class="form-control" placeholder="Search Assets, Transactions, Swaps, etc.">
+              </form>
+            </li>
+          </ul>
+          <ul class="navbar-nav navbar-nav-right">
+            <li class="nav-item dropdown d-none d-lg-block">
+              <a class="nav-link btn btn-success create-new-button" aria-expanded="false" href="#" data-toggle="modal" data-target="#addSwapModal">+ Submit a Swap</a>
+            </li>
+          </ul>
+          <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+            <span class="mdi mdi-format-line-spacing"></span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="main-panel">
+
+        <div class="content-wrapper angular-container">
+          <router-outlet></router-outlet>
+        </div>
+
+        <footer class="footer">
+          <div class="d-sm-flex justify-content-center justify-content-sm-between">
+            <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © some guy on the internet 2021</span>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add-Swap Modal -->
+  <div class="modal fade" #addSwapModal id="addSwapModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add a New Swap</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="signedPartial">Signed Partial</label>
+              <textarea class="form-control form-control-greytext signed-partial-input" name="signedPartial" id="signedPartial" rows="7" (ngModelChange)="partialChanged($event)" [ngModel]="signedPartialEntry"></textarea>
+            </div>
+            <div class="form-group row">
+              <label for="staticValid" class="col-sm-3 col-form-label">Valid:</label>
+              <div class="col-sm-3">
+                <input type="text" readonly id="staticValid" class="form-control-greytext" value="{{(signedPartialData && signedPartialData.valid) ? 'Yes' : 'No'}}">
+              </div>
+              <label for="staticAsset" class="col-sm-3 col-form-label">Asset:</label>
+              <div class="col-sm-3">
+                <input type="text" readonly id="staticAsset" class="form-control-greytext" *ngIf="signedPartialData" value="{{signedPartialData?.result?.assetName}}">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="staticQuantity" class="col-sm-3 col-form-label">Quantity:</label>
+              <div class="col-sm-3">
+                <input type="text" readonly id="staticQuantity" class="form-control-greytext" value="{{signedPartialData?.result?.quantity}}">
+              </div>
+              <label for="staticUnitPrice" class="col-sm-3 col-form-label">Unit Price:</label>
+              <div class="col-sm-3">
+                <input type="text" readonly id="staticUnitPrice" class="form-control-greytext" value="{{signedPartialData?.result?.unitPrice}} RVN">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="staticQuantity" class="col-sm-3 col-form-label">Type:</label>
+              <div class="col-sm-3">
+                <input type="text" readonly id="staticQuantity" class="form-control-greytext" value="{{signedPartialData?.result?.orderType ? (SwapType[signedPartialData?.result?.orderType]) : ''}}">
+              </div>
+              <label for="staticUnitPrice" class="col-sm-3 col-form-label">Total Value:</label>
+              <div class="col-sm-3">
+                <input type="text" readonly id="staticUnitPrice" class="form-control-greytext" value="{{signedPartialData?.result?.unitPrice * signedPartialData?.result?.quantity}} RVN">
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <span id="modalSwapFooter" class="text-success" style="float: left"></span>
+
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnDismissAddSwap">Close</button>
+          <button type="button" class="btn btn-primary {{ signedPartialData ? '' : 'disabled' }}" (click)="submitPartial()">Submit!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
