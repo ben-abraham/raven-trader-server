@@ -8,7 +8,7 @@ using raven_trader_server.Models;
 
 namespace raven_trader_server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/sitedata")]
     [ApiController]
     public class SiteDataController : ControllerBase
     {
@@ -25,42 +25,44 @@ namespace raven_trader_server.Controllers
             var head = _db.Blocks.OrderByDescending(b => b.Number).FirstOrDefault();
             var swaps = _db.Swaps.OrderByDescending(s => s.Block).Take(50);
 
-            var pastCutoff = DateTime.Now - TimeSpan.FromHours(24);
-
-            var dayBlock = _db.Blocks.Where(b => b.BlockTime >= pastCutoff).OrderBy(b => b.Number).FirstOrDefault();
-
-            //If no block, we are WAY behind....
-            if (dayBlock != null)
+            //If the site is really out of date.
+            if (head != null)
             {
-                var dayVolume = _db.AssetVolume.Where(av => av.Block >= dayBlock.Number)
-                    .GroupBy(av => av.AssetName)
-                    .Select(avg => new Models.RC_AssetVolume()
-                    {
-                        Block = dayBlock.Number,//dummy
+                var pastCutoff = DateTime.Now - TimeSpan.FromHours(24);
+
+                var dayBlock = _db.Blocks.Where(b => b.BlockTime >= pastCutoff).OrderBy(b => b.Number).FirstOrDefault();
+
+                //If no block, we are WAY behind....
+                if (dayBlock != null)
+                {
+                    var dayVolume = _db.AssetVolume.Where(av => av.Block >= dayBlock.Number)
+                        .GroupBy(av => av.AssetName)
+                        .Select(avg => new Models.RC_AssetVolume()
+                        {
+                            Block = dayBlock.Number,//dummy
                         AssetName = avg.Key,
-                        SwapVolume = avg.Sum(av => av.SwapVolume),
-                        TransactionVolume = avg.Sum(av => av.TransactionVolume)
-                    })
-                    .ToDictionary(av => av.AssetName, av => new { total = av.TransactionVolume, swap = av.SwapVolume });
+                            SwapVolume = avg.Sum(av => av.SwapVolume),
+                            TransactionVolume = avg.Sum(av => av.TransactionVolume)
+                        })
+                        .ToDictionary(av => av.AssetName, av => new { total = av.TransactionVolume, swap = av.SwapVolume });
 
-                return new JsonResult(new
-                {
-                    block = head.Number,
-                    hash = head.Hash,
-                    recent_swaps = swaps,
-                    asset_volume = dayVolume
-                });
+                    return new JsonResult(new
+                    {
+                        block = head.Number,
+                        hash = head.Hash,
+                        recent_swaps = swaps,
+                        asset_volume = dayVolume
+                    });
+                }
             }
-            else
+
+            return new JsonResult(new
             {
-                return new JsonResult(new
-                {
-                    block = head.Number,
-                    hash = head.Hash,
-                    recent_swaps = swaps,
-                    asset_volume = new { }
-                });
-            }
+                block = head?.Number,
+                hash = head?.Hash,
+                recent_swaps = swaps,
+                asset_volume = new { }
+            });
         }
 
         [HttpGet]

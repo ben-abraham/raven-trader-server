@@ -118,9 +118,8 @@ namespace raven_trader_server
 
             var response = JsonConvert.DeserializeObject<RPC_Response<T>>(rpc_response.Content);
 
-            if(response.Error != null)
+            if(response?.Error != null)
             {
-
             }
 
             return response;

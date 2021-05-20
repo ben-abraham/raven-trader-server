@@ -33,11 +33,8 @@ namespace raven_trader_server
             services.AddSingleton<RVN_RPC>();
             services.AddDbContext<RTDbContext>(options =>
             {
-                //options.UseInMemoryDatabase("RavenTrader");
-                options.UseSqlite("Data Source=RavenTrader.db;", opts_sqlDB =>
-                {
-                });
-                options.EnableSensitiveDataLogging(true);
+                options.UseSqlServer(Configuration["DB_CONNECTION"]);
+                //options.EnableSensitiveDataLogging(true);
             });
 
             services.AddHostedService<IndexingService>();
@@ -57,6 +54,7 @@ namespace raven_trader_server
                 app.UseHsts();
             }
 
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             if (!env.IsDevelopment())
@@ -72,6 +70,8 @@ namespace raven_trader_server
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
             });
+            app.UseStatusCodePagesWithReExecute("/");
+
 
             app.UseSpa(spa =>
             {
