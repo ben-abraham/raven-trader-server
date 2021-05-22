@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -16,6 +17,7 @@ namespace raven_trader_server.Services
     public class IndexingService : IHostedService, IDisposable
     {
         private readonly ILogger<IndexingService> _logger;
+        private readonly IConfiguration _config;
         private readonly RTDbContext _db;
         private readonly RVN_RPC _rpc;
 
@@ -27,9 +29,11 @@ namespace raven_trader_server.Services
 
         int MaxPerTimer = 1000;
 
-        public IndexingService(ILogger<IndexingService> logger, RVN_RPC rpc, IServiceScopeFactory scopeFactory, IHostApplicationLifetime applicationLifetime)
+        public IndexingService(ILogger<IndexingService> logger, RVN_RPC rpc, IConfiguration config,
+            IServiceScopeFactory scopeFactory, IHostApplicationLifetime applicationLifetime)
         {
             _logger = logger;
+            _config = config;
             _rpc = rpc;
             _indexScope = scopeFactory.CreateScope();
             _db = _indexScope.ServiceProvider.GetRequiredService<RTDbContext>();
@@ -60,56 +64,75 @@ namespace raven_trader_server.Services
         {
             lock (_timer) //Lock the timer to prevent any issues
             {
-                //_logger.LogInformation($"Indexer cycle");
-                List<RC_Block> blockAdds = new List<RC_Block>();
-                List<RC_Swap> swapAdds = new List<RC_Swap>();
-                List<RC_AssetVolume> volumeAdds = new List<RC_AssetVolume>();
-
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-
-                int numBlocks;
-                var nextBlockNumber = lastBlock == null ? 715000 : (lastBlock.Number + 1);
-                var currentBlocks = _rpc.GetNumBlocks();
-                bool isFinished = (nextBlockNumber + 10) >= currentBlocks;
-                //Anything within 10 blocks of head is considered "done" for logging
-
-                for (numBlocks = 0; numBlocks < MaxPerTimer; numBlocks++)
-                {
-                    //If we are all caught up, then don't process any more
-                    if (nextBlockNumber > currentBlocks) break;
-
-                    var blockIndexResults = IndexBlock(nextBlockNumber);
-
-                    blockAdds.Add(blockIndexResults.block);
-                    swapAdds.AddRange(blockIndexResults.swaps);
-                    volumeAdds.AddRange(blockIndexResults.volume);
-
-                    lastBlock = blockIndexResults.block;
-                    nextBlockNumber = lastBlock.Number + 1;
-                }
-
-                sw.Stop();
-
-                if (blockAdds.Count > 0)
-                {
-                    _db.Blocks.AddRange(blockAdds);
-                    _db.Swaps.AddRange(swapAdds);
-                    _db.AssetVolume.AddRange(volumeAdds);
-                    _db.SaveChanges();
-
-                    string extra = null;
-                    //Don't log time stats for every block
-                    if (!isFinished && sw.Elapsed.TotalSeconds != 0.00)
-                    {
-                        extra = $"[ {numBlocks / sw.Elapsed.TotalSeconds} BPS ]";
-                    }
-
-                    _logger.LogInformation($"Saved. Current HEAD - {lastBlock?.Number ?? 0}/{currentBlocks}. Total Volume - {volumeAdds.Sum(av => av.TransactionVolume)} Assets {extra}");
-                }
+                BlockIndexer();
             }
         }
 
+
+        private void BlockIndexer()
+        {
+            //_logger.LogInformation($"Indexer cycle");
+            List<RC_Block> blockAdds = new List<RC_Block>();
+            List<RC_Swap> swapAdds = new List<RC_Swap>();
+            List<RC_AssetVolume> volumeAdds = new List<RC_AssetVolume>();
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            int numBlocks;
+            int nextBlockNumber;
+            if(lastBlock == null)
+            {
+                _logger.LogWarning("Indexer starting fresh.");
+                if(!int.TryParse(_config["IndexStart"], out nextBlockNumber))
+                {
+                    _logger.LogWarning("No configured 'IndexStart', starting from 0");
+                    nextBlockNumber = 0;
+                }
+            }
+            else
+            {
+                nextBlockNumber = lastBlock.Number + 1;
+            }
+
+            var currentBlocks = _rpc.GetNumBlocks();
+            bool isFinished = (nextBlockNumber + 10) >= currentBlocks;
+            //Anything within 10 blocks of head is considered "done" for logging
+
+            for (numBlocks = 0; numBlocks < MaxPerTimer; numBlocks++)
+            {
+                //If we are all caught up, then don't process any more
+                if (nextBlockNumber > currentBlocks) break;
+
+                var blockIndexResults = IndexBlock(nextBlockNumber);
+
+                blockAdds.Add(blockIndexResults.block);
+                swapAdds.AddRange(blockIndexResults.swaps);
+                volumeAdds.AddRange(blockIndexResults.volume);
+
+                lastBlock = blockIndexResults.block;
+                nextBlockNumber = lastBlock.Number + 1;
+            }
+
+            sw.Stop();
+
+            if (blockAdds.Count > 0)
+            {
+                _db.Blocks.AddRange(blockAdds);
+                _db.Swaps.AddRange(swapAdds);
+                _db.AssetVolume.AddRange(volumeAdds);
+                _db.SaveChanges();
+
+                string extra = null;
+                //Don't log time stats for every block
+                if (!isFinished && sw.Elapsed.TotalSeconds != 0.00)
+                {
+                    extra = $"[ {numBlocks / sw.Elapsed.TotalSeconds} BPS ]";
+                }
+
+                _logger.LogInformation($"Saved. Current HEAD - {lastBlock?.Number ?? 0}/{currentBlocks}. Total Volume - {volumeAdds.Sum(av => av.TransactionVolume)} Assets {extra}");
+            }
+        }
 
         private (RC_Block block, List<RC_AssetVolume> volume, List<RC_Swap> swaps) IndexBlock(int blockNumber)
         {

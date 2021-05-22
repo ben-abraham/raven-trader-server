@@ -19,7 +19,6 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    ($(".toast") as any).toast();
   }
 
   partialChanged(newValue: string): void {

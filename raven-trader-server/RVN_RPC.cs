@@ -24,8 +24,10 @@ namespace raven_trader_server
             Configuration = configuration;
             Logger = logger;
 
-            RPC_Client = new RestClient($"http://{configuration["RPC_HOST"]}:18766");
-            RPC_Client.Authenticator = new HttpBasicAuthenticator("rosetta", "rosetta");
+            RPC_Client = new RestClient($"http://{configuration["RPC_HOST"]}:{configuration["RPC_PORT"]}");
+            RPC_Client.Authenticator = new HttpBasicAuthenticator(configuration["RPC_USER"], configuration["RPC_PASSWORD"]);
+
+            Logger.LogInformation($"RPC Startup: {RPC_Client.BaseUrl}");
         }
 
         //Specific helper functions
@@ -111,7 +113,7 @@ namespace raven_trader_server
             var rpc_response = RPC_Client.Execute(rpc_request);
             if(rpc_response.StatusCode != HttpStatusCode.OK)
             {
-                Logger.LogError($"Got status code {rpc_response.StatusCode} for RPC call.");
+                Logger.LogError($"Got status code {rpc_response.StatusCode} for RPC call. - {rpc_response.ErrorMessage}");
                 Logger.LogError($"==> {json_message}");
                 Logger.LogError($"<== {rpc_response.Content}");
             }

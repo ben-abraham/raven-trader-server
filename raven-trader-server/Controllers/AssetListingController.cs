@@ -56,10 +56,10 @@ namespace raven_trader_server.Controllers
 
                             dynamic parsed_tx = parse_test;
 
-                            if (parsed_tx.vin[0]?.scriptSig?.asm?.Contains(Constants.SINGLE_ANYONECANPAY))
+                            if (parsed_tx.vin[0]?.scriptSig?.asm?.ToString()?.Contains(Constants.SINGLE_ANYONECANPAY))
                             {
                                 var utxo = $"{parsed_tx.vin[0].txid}|{parsed_tx.vin[0].vout}";
-                                var type = parsed_tx.vout[0].type == Constants.VOUT_TYPE_TRANSFER_ASSET ? SwapType.Buy : SwapType.Sell;
+                                var type = parsed_tx.vout[0]?.scriptPubKey?.type == Constants.VOUT_TYPE_TRANSFER_ASSET ? SwapType.Buy : SwapType.Sell;
 
                                 //var src_transaction = (dynamic)Utils.FullExternalTXDecode((string)parsed_tx.vin[0].txid);
                                 var src_transaction = (dynamic)_rpc.GetRawTransaction((string)parsed_tx.vin[0].txid);
@@ -115,10 +115,10 @@ namespace raven_trader_server.Controllers
                 {
                     dynamic parsed_tx = parse_test;
 
-                    if (parsed_tx.vin[0]?.scriptSig?.asm?.Contains(Constants.SINGLE_ANYONECANPAY))
+                    if (parsed_tx.vin[0]?.scriptSig?.asm?.ToString()?.Contains(Constants.SINGLE_ANYONECANPAY))
                     {
                         var utxo = $"{parsed_tx.vin[0].txid}|{parsed_tx.vin[0].vout}";
-                        var type = parsed_tx.vout[0].type == Constants.VOUT_TYPE_TRANSFER_ASSET ? SwapType.Buy : SwapType.Sell;
+                        var type = parsed_tx.vout[0]?.scriptPubKey?.type == Constants.VOUT_TYPE_TRANSFER_ASSET ? SwapType.Buy : SwapType.Sell;
 
                         //var src_transaction = (dynamic)Utils.FullExternalTXDecode((string)parsed_tx.vin[0].txid);
                         var src_transaction = (dynamic)_rpc.GetRawTransaction((string)parsed_tx.vin[0].txid);
@@ -134,14 +134,14 @@ namespace raven_trader_server.Controllers
                         {
                             case SwapType.Buy:
                                 //For a buy order, the quantity is the amount being requested
-                                entry.Quantity = parsed_tx.vout[0].scriptPubKey.asset.amount;
-                                entry.AssetName = parsed_tx.vout[0].scriptPubKey.asset.name;
-                                entry.UnitPrice = src_vout.amount / entry.Quantity;
+                                entry.Quantity = (double)parsed_tx.vout[0].scriptPubKey.asset.amount;
+                                entry.AssetName = parsed_tx.vout[0].scriptPubKey.asset.name.ToString();
+                                entry.UnitPrice = (entry.Quantity == 0) ? 0 : src_vout.value / entry.Quantity;
                                 break;
                             case SwapType.Sell:
-                                entry.Quantity = src_vout.scriptPubKey.asset.amount;
-                                entry.AssetName = src_vout.scriptPubKey.asset.name;
-                                entry.UnitPrice = parsed_tx.vout[0].value / entry.Quantity;
+                                entry.Quantity = (double)src_vout.scriptPubKey.asset.amount;
+                                entry.AssetName = src_vout.scriptPubKey.asset.name.ToString();
+                                entry.UnitPrice = (entry.Quantity == 0) ? 0 : ((double)parsed_tx.vout[0].value) / entry.Quantity;
                                 break;
                         }
 

@@ -80,27 +80,27 @@
               </div>
               <label for="staticAsset" class="col-sm-3 col-form-label">Asset:</label>
               <div class="col-sm-3">
-                <input type="text" readonly id="staticAsset" class="form-control-greytext" *ngIf="signedPartialData" value="{{signedPartialData?.result?.assetName}}">
+                <input type="text" readonly id="staticAsset" class="form-control-greytext" *ngIf="signedPartialData?.result" value="{{signedPartialData.result.assetName}}">
               </div>
             </div>
             <div class="form-group row">
               <label for="staticQuantity" class="col-sm-3 col-form-label">Quantity:</label>
               <div class="col-sm-3">
-                <input type="text" readonly id="staticQuantity" class="form-control-greytext" value="{{signedPartialData?.result?.quantity}}">
+                <input type="text" readonly id="staticQuantity" class="form-control-greytext" *ngIf="signedPartialData?.result" value="{{signedPartialData.result.quantity}}">
               </div>
               <label for="staticUnitPrice" class="col-sm-3 col-form-label">Unit Price:</label>
               <div class="col-sm-3">
-                <input type="text" readonly id="staticUnitPrice" class="form-control-greytext" value="{{signedPartialData?.result?.unitPrice}} RVN">
+                <input type="text" readonly id="staticUnitPrice" class="form-control-greytext" *ngIf="signedPartialData?.result" value="{{signedPartialData.result.unitPrice}} RVN">
               </div>
             </div>
             <div class="form-group row">
-              <label for="staticQuantity" class="col-sm-3 col-form-label">Type:</label>
+              <label for="staticType" class="col-sm-3 col-form-label">Type:</label>
               <div class="col-sm-3">
-                <input type="text" readonly id="staticQuantity" class="form-control-greytext" value="{{signedPartialData?.result?.orderType ? (SwapType[signedPartialData?.result?.orderType]) : ''}}">
+                <input type="text" readonly id="staticType" class="form-control-greytext" *ngIf="signedPartialData?.result" value="{{ SwapType[signedPartialData.result.orderType] }}">
               </div>
-              <label for="staticUnitPrice" class="col-sm-3 col-form-label">Total Value:</label>
+              <label for="staticFinalPrice" class="col-sm-3 col-form-label">Total Value:</label>
               <div class="col-sm-3">
-                <input type="text" readonly id="staticUnitPrice" class="form-control-greytext" value="{{signedPartialData?.result?.unitPrice * signedPartialData?.result?.quantity}} RVN">
+                <input type="text" readonly id="staticFinalPrice" class="form-control-greytext" *ngIf="signedPartialData?.result" value="{{signedPartialData.result.unitPrice * signedPartialData.result.quantity}} RVN">
               </div>
             </div>
           </form>
@@ -109,7 +109,7 @@
           <span id="modalSwapFooter" class="text-success" style="float: left"></span>
 
           <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnDismissAddSwap">Close</button>
-          <button type="button" class="btn btn-primary {{ signedPartialData ? '' : 'disabled' }}" (click)="submitPartial()">Submit!</button>
+          <button type="button" class="btn btn-primary {{ signedPartialData ? '' : 'disabled' }}" (click)="submitPartial()">{{ signedPartialData ? 'Submit!' : 'Invalid' }}</button>
         </div>
       </div>
     </div>

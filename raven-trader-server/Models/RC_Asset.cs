@@ -9,8 +9,14 @@ namespace raven_trader_server.Models
     public class RC_Asset
     {
         [Key]
-        public int ID { get; set; }
-
         public string Name { get; set; }
+
+        public int Block { get; set; }
+
+        public double Amount { get; set; }
+        public int Units { get; set; }
+        public bool Reissuable { get; set; }
+        //public string BlockHash { get; set; }
+        public string IPFS_Hash { get; set; }
     }
 }

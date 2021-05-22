@@ -83,7 +83,31 @@ namespace raven_trader_server.Controllers
             return new JsonResult(new {
                 offset = offset,
                 totalCount = totalCount,
-                swaps = swapQuery.ToArray()
+                swaps = finalQuery.ToArray()
+            });
+        }
+
+        [HttpGet]
+        [Route("swaphistory")]
+        public JsonResult GetHistory(string assetName, string swapType, int pageSize = 100, int offset = 0)
+        {
+            if (pageSize > Constants.MAX_PAGE_SIZE) pageSize = Constants.MAX_PAGE_SIZE;
+
+            var swapQuery = _db.Swaps.AsQueryable();
+
+            if (!string.IsNullOrEmpty(assetName))
+                swapQuery = swapQuery.Where(s => s.AssetName == assetName);
+            if (!string.IsNullOrEmpty(swapType) && Enum.TryParse<SwapType>(swapType, out var parsedType))
+                swapQuery = swapQuery.Where(s => s.Type == parsedType);
+
+            var finalQuery = swapQuery.OrderByDescending(s => s.Block).Skip(offset).Take(pageSize);
+            var totalCount = swapQuery.Count();
+
+            return new JsonResult(new
+            {
+                offset = offset,
+                totalCount = totalCount,
+                swaps = finalQuery.ToArray()
             });
         }
     }
