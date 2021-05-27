@@ -40,7 +40,7 @@ namespace raven_trader_server.Controllers
                         .Select(avg => new Models.RC_AssetVolume()
                         {
                             Block = dayBlock.Number,//dummy
-                        AssetName = avg.Key,
+                            AssetName = avg.Key,
                             SwapVolume = avg.Sum(av => av.SwapVolume),
                             TransactionVolume = avg.Sum(av => av.TransactionVolume)
                         })
@@ -71,13 +71,13 @@ namespace raven_trader_server.Controllers
         {
             if (pageSize > Constants.MAX_PAGE_SIZE) pageSize = Constants.MAX_PAGE_SIZE;
 
-            var swapQuery = _db.Listings.AsQueryable();
+            var swapQuery = _db.Listings.AsQueryable().Where(l => l.Active);
             if (!string.IsNullOrEmpty(assetName))
                 swapQuery = swapQuery.Where(s => s.AssetName == assetName);
             if (!string.IsNullOrEmpty(swapType) && Enum.TryParse<SwapType>(swapType, out var parsedType))
                 swapQuery = swapQuery.Where(s => s.OrderType == parsedType);
 
-            var finalQuery = swapQuery.Skip(offset).Take(pageSize);
+            var finalQuery = swapQuery.OrderByDescending(l => l.SubmitTime).Skip(offset).Take(pageSize);
             var totalCount = swapQuery.Count();
 
             return new JsonResult(new {

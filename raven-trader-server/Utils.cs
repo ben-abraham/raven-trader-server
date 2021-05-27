@@ -24,5 +24,13 @@ namespace raven_trader_server
             var resp = rc.Execute(rr);
             return JObject.Parse(resp.Content);
         }
+
+        public static IEnumerable<T[]> ChunkItems<T>(IEnumerable<T> Items, int ChunkSize = 100)
+        {
+            return Items
+                    .Select((s, i) => new { Value = s, Index = i })
+                    .GroupBy(x => x.Index / ChunkSize)
+                    .Select(grp => grp.Select(x => x.Value).ToArray());
+        }
     }
 }

@@ -20,6 +20,7 @@ namespace raven_trader_server.Models
         public double Quantity { get; set; }
         public double UnitPrice { get; set; }
 
+        public DateTime SubmitTime { get; set; }
         public bool Active { get; set; }
         public int ExecutedBlock { get; set; }
         public string ExecutedTXID { get; set; }
@@ -90,6 +91,7 @@ namespace raven_trader_server.Models
                 Value = existing;
             }
 
+            Value.SubmitTime = DateTime.UtcNow;
             Value.B64SignedPartial = Convert.ToBase64String(Utils.StringToByteArray(listing.Hex));
             Value.OrderType = type;
 
