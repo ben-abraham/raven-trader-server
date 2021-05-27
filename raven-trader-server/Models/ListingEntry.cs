@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,7 +13,6 @@ namespace raven_trader_server.Models
     {
         [Key]
         public string UTXO { get; set; }
-        public bool Active { get; set; }
         public string Memo { get; set; }
         public string B64SignedPartial { get; set; }
         public SwapType OrderType { get; set; }
@@ -20,8 +20,12 @@ namespace raven_trader_server.Models
         public double Quantity { get; set; }
         public double UnitPrice { get; set; }
 
+        public bool Active { get; set; }
+        public int ExecutedBlock { get; set; }
+        public string ExecutedTXID { get; set; }
 
-        public static bool TryParse(RVN_RPC rpc, ListingHex listing, out ListingEntry Value, out string Error, bool ValidateSignature = true)
+
+        public static bool TryParse(RVN_RPC rpc, RTDbContext db, ListingHex listing, out ListingEntry Value, out string Error, bool ValidateSignature = true)
         {
             Value = null;
             Error = null;
@@ -64,19 +68,30 @@ namespace raven_trader_server.Models
                 Error = "Transaction is not signed with SINGLE|ANYONECANPAY. Not a valid swap.";
             }
 
-            var utxo = $"{parsed_tx.vin[0].txid}|{parsed_tx.vin[0].vout}";
+            var utxo = $"{parsed_tx.vin[0].txid}-{parsed_tx.vin[0].vout}";
             var type = parsed_tx.vout[0]?.scriptPubKey?.type == Constants.VOUT_TYPE_TRANSFER_ASSET ? SwapType.Buy : SwapType.Sell;
 
+            //Must be fully txindexed to be able to use GetRawTransaction arbitrarily
             //var src_transaction = (dynamic)Utils.FullExternalTXDecode((string)parsed_tx.vin[0].txid);
             var src_transaction = (dynamic)rpc.GetRawTransaction((string)parsed_tx.vin[0].txid);
             var src_vout = src_transaction.vout[(int)parsed_tx.vin[0].vout];
 
-            Value = new ListingEntry()
+            var existing = db.Listings.SingleOrDefault(l => l.UTXO == utxo);
+
+            if (existing == null)
             {
-                UTXO = utxo,
-                B64SignedPartial = Convert.ToBase64String(Utils.StringToByteArray(listing.Hex)),
-                OrderType = type
-            };
+                Value = new ListingEntry()
+                {
+                    UTXO = utxo
+                };
+            }
+            else
+            {
+                Value = existing;
+            }
+
+            Value.B64SignedPartial = Convert.ToBase64String(Utils.StringToByteArray(listing.Hex));
+            Value.OrderType = type;
 
             switch (Value.OrderType)
             {
