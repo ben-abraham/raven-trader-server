@@ -56,10 +56,11 @@ export class AppComponent implements OnInit {
   }
 
   showSubmitWindow(event: MouseEvent): void {
-    this.signedPartialEntry = ""
-    this.signedPartialData = null
+    this.signedPartialEntry = "";
+    this.signedPartialData = null;
     this.previewMode = false;
-    $(this.swapHex.nativeElement).removeAttr("readonly")
+    $(this.swapHex.nativeElement).removeAttr("readonly");
+    $("#addSwapModal").modal("show");
   }
 
   partialChanged(newValue: string): void {
