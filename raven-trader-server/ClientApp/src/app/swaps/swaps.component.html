@@ -22,6 +22,7 @@
                 <th>Quantity</th>
                 <th>Unit Price</th>
                 <th>Total Price</th>
+                <th>Details</th>
               </tr>
             </thead>
             <tbody>
@@ -30,6 +31,7 @@
                 <td>{{ swap.quantity }}</td>
                 <td>{{ swap.unitPrice }} RVN</td>
                 <td>{{ swap.unitPrice * swap.quantity }} RVN</td>
+                <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
               </tr>
             </tbody>
           </table>
