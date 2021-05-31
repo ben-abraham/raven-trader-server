@@ -80,7 +80,6 @@ export class AppComponent implements OnInit {
   submitPartial(): void {
     if (this.signedPartialData && this.signedPartialData.valid) {
       console.log("Listing");
-      this.signedPartialData.result.orderType
       this.dataService.listSignedPartial(this.signedPartialEntry).subscribe((response) => {
         if (response.valid) {
           console.log("Listed!");

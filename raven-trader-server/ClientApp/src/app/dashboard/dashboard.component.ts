@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DataService, DTOSiteData, DTOSwap } from '../services/data.service';
+import { DataService, DTOSiteData, DTOSwap, SwapType } from '../services/data.service';
 import { Subscribable, Subject } from 'rxjs';
 
 @Component({
@@ -7,6 +7,7 @@ import { Subscribable, Subject } from 'rxjs';
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
+  SwapType: typeof SwapType = SwapType;
 
   public dataSub: Subscribable<DTOSiteData>;
   public data: DTOSiteData;

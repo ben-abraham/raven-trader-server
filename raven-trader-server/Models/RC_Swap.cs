@@ -19,7 +19,20 @@ namespace raven_trader_server.Models
         public string OutType { get; set; }
         public double InQuantity { get; set; }
         public double OutQuantity { get; set; }
-        public float UnitPrice { get; set; }
+        public double UnitPrice
+        {
+            get
+            {
+                if (Type == SwapType.Buy)
+                    return InQuantity / OutQuantity;
+                else if (Type == SwapType.Sell)
+                    return OutQuantity / InQuantity;
+                else if (Type == SwapType.Trade)
+                    return InQuantity / OutQuantity;
+                else
+                    return 0;
+            }
+        }
     }
 
     public enum SwapType

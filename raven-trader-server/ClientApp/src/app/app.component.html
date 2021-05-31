@@ -74,33 +74,58 @@
               <textarea #swapHex class="form-control form-control-greytext signed-partial-input" name="signedPartial" id="signedPartial" rows="7" (ngModelChange)="partialChanged($event)" [ngModel]="signedPartialEntry"></textarea>
             </div>
             <div class="form-group row">
-              <label for="staticValid" class="col-sm-3 col-form-label">Valid:</label>
-              <div class="col-sm-3">
-                <input type="text" readonly id="staticValid" class="form-control-greytext" value="{{(signedPartialData && signedPartialData.valid) ? 'Yes' : 'No'}}">
+              <label for="staticValid" class="col-sm-2 col-form-label">Valid:</label>
+              <div class="col-sm-4">
+                <input type="text" readonly id="staticValid" class="form-control-greytext"
+                  value="{{ (signedPartialData && signedPartialData.valid) ? 'Yes' : 'No' }}">
               </div>
-              <label for="staticAsset" class="col-sm-3 col-form-label">Asset:</label>
-              <div class="col-sm-3">
-                <input type="text" readonly id="staticAsset" class="form-control-greytext" *ngIf="signedPartialData?.result" value="{{signedPartialData.result.assetName}}">
-              </div>
-            </div>
-            <div class="form-group row">
-              <label for="staticQuantity" class="col-sm-3 col-form-label">Quantity:</label>
-              <div class="col-sm-3">
-                <input type="text" readonly id="staticQuantity" class="form-control-greytext" *ngIf="signedPartialData?.result" value="{{signedPartialData.result.quantity}}">
-              </div>
-              <label for="staticUnitPrice" class="col-sm-3 col-form-label">Unit Price:</label>
-              <div class="col-sm-3">
-                <input type="text" readonly id="staticUnitPrice" class="form-control-greytext" *ngIf="signedPartialData?.result" value="{{signedPartialData.result.unitPrice}} RVN">
+              <label for="staticType" class="col-sm-2 col-form-label">Type:</label>
+              <div class="col-sm-4">
+                <input type="text" readonly id="staticType" class="form-control-greytext"
+                  *ngIf="signedPartialData?.result"
+                  value="{{ SwapType[signedPartialData.result.orderType] }}">
               </div>
             </div>
             <div class="form-group row">
-              <label for="staticType" class="col-sm-3 col-form-label">Type:</label>
-              <div class="col-sm-3">
-                <input type="text" readonly id="staticType" class="form-control-greytext" *ngIf="signedPartialData?.result" value="{{ SwapType[signedPartialData.result.orderType] }}">
+              <label for="staticInput" class="col-sm-2 col-form-label">Input:</label>
+              <div class="col-sm-4" [ngSwitch]="signedPartialData?.result?.orderType">
+                <label type="text" readonly id="staticInput" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Buy">{{ signedPartialData.result.inQuantity | number:'1.0-8' }} RVN </label>
+                <label type="text" readonly id="staticInput" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Sell">{{ signedPartialData.result.inQuantity | number:'1.0-8' }} {{ signedPartialData.result.inType }} </label>
+                <label type="text" readonly id="staticInput" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Trade">{{ signedPartialData.result.inQuantity | number:'1.0-8' }} {{ signedPartialData.result.inType }} </label>
               </div>
-              <label for="staticFinalPrice" class="col-sm-3 col-form-label">Total Value:</label>
-              <div class="col-sm-3">
-                <input type="text" readonly id="staticFinalPrice" class="form-control-greytext" *ngIf="signedPartialData?.result" value="{{signedPartialData.result.unitPrice * signedPartialData.result.quantity}} RVN">
+              <label for="staticOutput" class="col-sm-2 col-form-label">Output:</label>
+              <div class="col-sm-4" [ngSwitch]="signedPartialData?.result?.orderType">
+                <label type="text" readonly id="staticOutput" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Buy">{{ signedPartialData.result.outQuantity | number:'1.0-8' }} {{ signedPartialData.result.outType }} </label>
+                <label type="text" readonly id="staticOutput" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Sell">{{ signedPartialData.result.outQuantity | number:'1.0-8' }} RVN </label>
+                <label type="text" readonly id="staticOutput" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Trade">{{ signedPartialData.result.outQuantity | number:'1.0-8' }} {{ signedPartialData.result.outType }} </label>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="staticUnitPrice" class="col-sm-2 col-form-label">Unit Price:</label>
+              <div class="col-sm-4" [ngSwitch]="signedPartialData?.result?.orderType">
+                <label type="text" readonly id="staticUnitPrice" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Buy">{{ signedPartialData.result.unitPrice | number:'1.0-8' }} RVN/{{ signedPartialData.result.outType }}</label>
+                <label type="text" readonly id="staticUnitPrice" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Sell">{{ signedPartialData.result.unitPrice | number:'1.0-8' }} RVN/{{ signedPartialData.result.inType }}</label>
+                <label type="text" readonly id="staticUnitPrice" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Trade">{{ signedPartialData.result.unitPrice | number:'1.0-8' }} {{ signedPartialData.result.inType }}/{{ signedPartialData.result.outType }}</label>
+                <label type="text" readonly id="staticInvUnitPrice" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Trade">{{ 1/signedPartialData.result.unitPrice | number:'1.0-8' }} {{ signedPartialData.result.outType }}/{{ signedPartialData.result.inType }}</label>
+              </div>
+              <label for="staticFinalPrice" class="col-sm-2 col-form-label">Total Value:</label>
+              <div class="col-sm-4" [ngSwitch]="signedPartialData?.result?.orderType">
+                <label type="text" readonly id="staticFinalPrice" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Buy">{{ signedPartialData.result.inQuantity | number:'1.0-8' }} RVN</label>
+                <label type="text" readonly id="staticFinalPrice" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Sell" >{{ signedPartialData.result.outQuantity | number:'1.0-8' }} RVN</label>
+                <label type="text" readonly id="staticFinalPrice" class="form-control-greytext"
+                       *ngSwitchCase="SwapType.Trade">{{ signedPartialData.result.outQuantity | number:'1.0-8' }} {{ signedPartialData.result.outType | number:'1.0-8' }}</label>
               </div>
             </div>
           </form>

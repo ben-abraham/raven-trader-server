@@ -59,13 +59,31 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let swap of swaps">
-                <td>{{ swap.assetName }}</td>
-                <td>{{ swap.block }}</td>
-                <td>{{ swap.type == 0 ? "Buy" : "Sell" }}</td>
-                <td>{{ swap.quantity }}x @ {{ swap.unitPrice }} RVN ea.</td>
-                <td>{{ swap.unitPrice * swap.quantity }} RVN</td>
-              </tr>
+              <ng-container *ngFor="let swap of swaps">
+                <ng-container [ngSwitch]="swap.type">
+                  <tr *ngSwitchCase="SwapType.Buy">
+                    <td>{{ swap.outType }}</td>
+                    <td>{{ swap.block }}</td>
+                    <td>{{ SwapType[swap.type] }}</td>
+                    <td>{{ swap.outQuantity }}x @ {{ swap.unitPrice }} RVN ea.</td>
+                    <td>{{ swap.inQuantity }} RVN</td>
+                  </tr>
+                  <tr *ngSwitchCase="SwapType.Sell">
+                    <td>{{ swap.inType }}</td>
+                    <td>{{ swap.block }}</td>
+                    <td>{{ SwapType[swap.type] }}</td>
+                    <td>{{ swap.inQuantity }}x @ {{ swap.unitPrice }} RVN ea.</td>
+                    <td>{{ swap.outQuantity }} RVN</td>
+                  </tr>
+                  <tr *ngSwitchCase="SwapType.Trade">
+                    <td>{{ swap.outType }}</td>
+                    <td>{{ swap.block }}</td>
+                    <td>{{ SwapType[swap.type] }}</td>
+                    <td>{{ swap.outQuantity }}x @ {{ swap.unitPrice }}x {{ swap.inType }} ea.</td>
+                    <td>{{ swap.inQuantity }}x {{ swap.inType }}</td>
+                  </tr>
+                </ng-container>
+              </ng-container>
             </tbody>
           </table>
         </div>

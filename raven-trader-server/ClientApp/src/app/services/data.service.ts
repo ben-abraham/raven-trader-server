@@ -74,14 +74,18 @@ export interface AssetLookup<T> {
   [AssetName: string]: T;
 };
 
-export interface DTOSwap {
+export interface SwapDetails {
+  type: SwapType;
+  inType: string;
+  inQuantity: number;
+  outType: string;
+  outQuantity: number;
+  unitPrice: number;
+}
+
+export interface DTOSwap extends SwapDetails {
   txid: string;
   block: number;
-
-  assetName: string;
-  type: SwapType;
-  quantity: number;
-  unitPrice: number;
 };
 
 export interface DTOSiteData {
@@ -97,13 +101,9 @@ export interface DTOListingResults {
   totalCount: number;
 }
 
-export interface DTOAssetListing {
+export interface DTOAssetListing extends SwapDetails {
   utxo: string;
   b64SignedPartial: string;
-  orderType: SwapType;
-  assetName: string;
-  quantity: number;
-  unitPrice: number;
 }
 
 export interface DTOParseSignedPartial {
@@ -114,5 +114,5 @@ export interface DTOParseSignedPartial {
 export enum SwapType {
   Buy = 0,
   Sell = 1,
-  Exchange = 2
+  Trade = 2
 }
