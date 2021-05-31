@@ -75,7 +75,7 @@ export interface AssetLookup<T> {
 };
 
 export interface SwapDetails {
-  type: SwapType;
+  orderType: SwapType;
   inType: string;
   inQuantity: number;
   outType: string;
