@@ -13,6 +13,13 @@ namespace raven_trader_server.Models
 
         public static bool IsSwapTransaction(RVN_RPC RPC, dynamic DecodedTransaction, int Block, out RC_Swap Swap)
         {
+            /*
+             * 
+             *  A lot of this code is simmilar/duplicated from ListingEntry.cs
+             *  Primarily to differentiate between listing submissions and detected on-chain transactions
+             * 
+             */
+
             Swap = null;
 
             //if (!(DecodedTransaction.vin.Count >= 1)) return false;
@@ -36,7 +43,7 @@ namespace raven_trader_server.Models
                 if (tx_vin.scriptSig?.asm?.ToString()?.Contains(Constants.SINGLE_ANYONECANPAY))
                 {
                     //If we see [SINGLE|ANYONECANPAY] in anything other than the first vin, this is a complex swap. skip for now.
-                    return false;
+                    //return false; //This happens sometimes :shrug:
                 }
 
                 swap_result_vin.Add(tx_vin);
@@ -45,56 +52,55 @@ namespace raven_trader_server.Models
 
             dynamic swap_setup_src = RPC.GetRawTransaction(swap_setup_vin.txid.ToString());
             dynamic swap_setup_src_vout = swap_setup_src.vout[(int)swap_setup_vin.vout];
-            SwapType swapType;
-            float quantity, unitPrice;
-            string assetName;
+            string txid = DecodedTransaction.txid.ToString();
 
-            if(swap_setup_vout?.scriptPubKey?.type == Constants.VOUT_TYPE_TRANSFER_ASSET)//Setup party wanted assets
+            string in_type = swap_setup_src_vout?.scriptPubKey?.type?.ToString();
+            string out_Type = swap_setup_vout?.scriptPubKey?.type?.ToString();
+
+            if (in_type == Constants.VOUT_TYPE_TRANSFER_ASSET && out_Type == Constants.VOUT_TYPE_TRANSFER_ASSET)
             {
-                
-                if(swap_setup_src_vout?.scriptPubKey?.type == Constants.VOUT_TYPE_TRANSFER_ASSET)//Setup party provided assets
+                Swap = new RC_Swap()
                 {
-                    swapType = SwapType.Exchange;
-
-                    return false;
-                }
-                else//pubkeyhash (or scripthash?), Setup party provided RVN. So it's a buy
-                {
-                    swapType = SwapType.Buy;
-
-                    assetName = swap_setup_vout.scriptPubKey.asset.name;
-                    quantity = swap_setup_vout.scriptPubKey.asset.amount;
-                    unitPrice = swap_setup_src_vout.value / quantity;
-                }
+                    TXID = txid,
+                    Block = Block,
+                    Type = SwapType.Trade,
+                    InType = swap_setup_src_vout.scriptPubKey.asset.name,
+                    InQuantity = swap_setup_src_vout.scriptPubKey.asset.amount,
+                    OutType = swap_setup_vout.scriptPubKey.asset.name,
+                    OutQuantity = swap_setup_vout.scriptPubKey.asset.amount
+                };
+                return true;
             }
-            else//Setup party wanted RVN
+            else if (out_Type == Constants.VOUT_TYPE_TRANSFER_ASSET)
             {
-                if (swap_setup_src_vout?.scriptPubKey?.type == Constants.VOUT_TYPE_TRANSFER_ASSET) //Setup party provided assets, so it's a sell
+                Swap = new RC_Swap()
                 {
-                    swapType = SwapType.Sell;
-
-                    assetName = swap_setup_src_vout.scriptPubKey.asset.name;
-                    quantity = swap_setup_src_vout.scriptPubKey.asset.amount;
-                    unitPrice = swap_setup_vout.value / quantity;
-                }
-                else
+                    TXID = txid,
+                    Block = Block,
+                    Type = SwapType.Buy,
+                    InType = "rvn",
+                    InQuantity = swap_setup_src_vout.value,
+                    OutType = swap_setup_vout.scriptPubKey.asset.name,
+                    OutQuantity = swap_setup_vout.scriptPubKey.asset.amount
+                };
+                return true;
+            }
+            else if (in_type == Constants.VOUT_TYPE_TRANSFER_ASSET)
+            {
+                Swap = new RC_Swap()
                 {
-                    //wTF are they doing? RVN-RVN swap....?
-
-                    return false;
-                }
+                    TXID = txid,
+                    Block = Block,
+                    Type = SwapType.Sell,
+                    InType = swap_setup_src_vout.scriptPubKey.asset.name,
+                    InQuantity = swap_setup_src_vout.scriptPubKey.asset.amount,
+                    OutType = "rvn",
+                    OutQuantity = swap_setup_vout.value
+                };
+                return true;
             }
 
-            Swap = new RC_Swap()
-            {
-                TXID = DecodedTransaction.txid.ToString(),
-                Block = Block,
-                Type = swapType,
-                AssetName = assetName,
-                Quantity = quantity,
-                UnitPrice = unitPrice
-            };
-            return true;
+            return false;
         }
     }
 }

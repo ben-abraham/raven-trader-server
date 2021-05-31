@@ -15,7 +15,7 @@ namespace raven_trader_server.Models
         public int Block { get; set; }
         public string AssetName { get; set; }
 
-        public float TransactionVolume { get; set; }
-        public float SwapVolume { get; set; }
+        public double TransactionVolume { get; set; }
+        public double SwapVolume { get; set; }
     }
 }

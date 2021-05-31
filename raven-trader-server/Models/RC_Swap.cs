@@ -13,9 +13,12 @@ namespace raven_trader_server.Models
         public int Block { get; set; }
 
 
-        public string AssetName { get; set; }
         public SwapType Type { get; set; }
-        public float Quantity { get; set; }
+
+        public string InType { get; set; }
+        public string OutType { get; set; }
+        public double InQuantity { get; set; }
+        public double OutQuantity { get; set; }
         public float UnitPrice { get; set; }
     }
 
@@ -23,6 +26,6 @@ namespace raven_trader_server.Models
     {
         Buy,
         Sell,
-        Exchange
+        Trade
     }
 }

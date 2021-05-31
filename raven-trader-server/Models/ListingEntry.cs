@@ -16,8 +16,12 @@ namespace raven_trader_server.Models
         public string Memo { get; set; }
         public string B64SignedPartial { get; set; }
         public SwapType OrderType { get; set; }
-        public string AssetName { get; set; }
-        public double Quantity { get; set; }
+        
+        public string InType { get; set; }
+        public string OutType { get; set; }
+        public double InQuantity { get; set; }
+        public double OutQuantity { get; set; }
+
         public double UnitPrice { get; set; }
 
         public DateTime SubmitTime { get; set; }
@@ -67,15 +71,33 @@ namespace raven_trader_server.Models
             if (!parsed_tx.vin[0]?.scriptSig?.asm?.ToString()?.Contains(Constants.SINGLE_ANYONECANPAY))
             {
                 Error = "Transaction is not signed with SINGLE|ANYONECANPAY. Not a valid swap.";
+                return false;
             }
 
             var utxo = $"{parsed_tx.vin[0].txid}-{parsed_tx.vin[0].vout}";
-            var type = parsed_tx.vout[0]?.scriptPubKey?.type == Constants.VOUT_TYPE_TRANSFER_ASSET ? SwapType.Buy : SwapType.Sell;
 
             //Must be fully txindexed to be able to use GetRawTransaction arbitrarily
             //var src_transaction = (dynamic)Utils.FullExternalTXDecode((string)parsed_tx.vin[0].txid);
             var src_transaction = (dynamic)rpc.GetRawTransaction((string)parsed_tx.vin[0].txid);
             var src_vout = src_transaction.vout[(int)parsed_tx.vin[0].vout];
+
+            var in_type = src_vout?.scriptPubKey?.type;
+            var out_Type = parsed_tx.vout[0]?.scriptPubKey?.type;
+
+            SwapType? type = null;
+
+            if (in_type == Constants.VOUT_TYPE_TRANSFER_ASSET && out_Type == Constants.VOUT_TYPE_TRANSFER_ASSET)
+                type = SwapType.Trade;
+            else if (out_Type == Constants.VOUT_TYPE_TRANSFER_ASSET)
+                type = SwapType.Buy;
+            else if (in_type == Constants.VOUT_TYPE_TRANSFER_ASSET)
+                type = SwapType.Sell;
+
+            if(type == null)
+            {
+                Error = "Swap does not contain a recognized Input/Output transaction type combination";
+                return false;
+            }
 
             var existing = db.Listings.SingleOrDefault(l => l.UTXO == utxo);
 
@@ -93,24 +115,37 @@ namespace raven_trader_server.Models
 
             Value.SubmitTime = DateTime.UtcNow;
             Value.B64SignedPartial = Convert.ToBase64String(Utils.StringToByteArray(listing.Hex));
-            Value.OrderType = type;
+            Value.OrderType = type.Value;
 
             switch (Value.OrderType)
             {
                 case SwapType.Buy:
                     //For a buy order, the quantity is the amount being requested
-                    Value.Quantity = parsed_tx.vout[0].scriptPubKey.asset.amount;
-                    Value.AssetName = parsed_tx.vout[0].scriptPubKey.asset.name;
-                    Value.UnitPrice = src_vout.amount / Value.Quantity;
+                    Value.InType = "rvn";
+                    Value.InQuantity = src_vout.value;
+                    Value.OutType = parsed_tx.vout[0].scriptPubKey.asset.name;
+                    Value.OutQuantity = parsed_tx.vout[0].scriptPubKey.asset.amount;
+
+                    Value.UnitPrice = Value.InQuantity / Value.OutQuantity;
                     break;
                 case SwapType.Sell:
-                    Value.Quantity = src_vout.scriptPubKey.asset.amount;
-                    Value.AssetName = src_vout.scriptPubKey.asset.name;
-                    Value.UnitPrice = parsed_tx.vout[0].value / Value.Quantity;
+                    Value.InType = src_vout.scriptPubKey.asset.name;
+                    Value.InQuantity = src_vout.scriptPubKey.asset.amount;
+                    Value.OutType = "rvn";
+                    Value.OutQuantity = parsed_tx.vout[0].value;
+
+                    Value.UnitPrice = Value.OutQuantity / Value.InQuantity;
+                    break;
+                case SwapType.Trade:
+                    Value.InType = src_vout.scriptPubKey.asset.name;
+                    Value.InQuantity = src_vout.scriptPubKey.asset.amount;
+                    Value.OutType = parsed_tx.vout[0].scriptPubKey.asset.name;
+                    Value.OutQuantity = parsed_tx.vout[0].scriptPubKey.asset.amount;
+
+                    Value.UnitPrice = Value.InQuantity / Value.OutQuantity;
                     break;
             }
             return true;
-                    
         }
 
     }

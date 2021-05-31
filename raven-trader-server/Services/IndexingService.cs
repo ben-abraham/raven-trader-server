@@ -159,19 +159,30 @@ namespace raven_trader_server.Services
 
             Dictionary<string, RC_AssetVolume> assetVolumes = new Dictionary<string, RC_AssetVolume>();
 
+            Action<string, double, bool> addAssetVolume = (asset_name, quantity, as_swap) =>
+            {
+                if (quantity == 0) return;
+
+                RC_AssetVolume vol = assetVolumes.ContainsKey(asset_name) ? assetVolumes[asset_name] : new RC_AssetVolume()
+                {
+                    AssetName = asset_name,
+                    Block = blockNumber,
+                };
+                if (as_swap)
+                    vol.SwapVolume += quantity;
+                else
+                    vol.TransactionVolume += quantity;
+                assetVolumes[asset_name] = vol;
+            };
+
             foreach (var block_tx in blockDetails.tx)
             {
                 if (RC_Transaction.IsSwapTransaction(_rpc, block_tx, blockNumber, out RC_Swap swap))
                 {
                     foundSwaps.Add(swap);
 
-                    RC_AssetVolume vol = assetVolumes.ContainsKey(swap.AssetName) ? assetVolumes[swap.AssetName] : new RC_AssetVolume()
-                    {
-                        AssetName = swap.AssetName,
-                        Block = blockNumber,
-                    };
-                    vol.SwapVolume += swap.Quantity;
-                    assetVolumes[swap.AssetName] = vol;
+                    addAssetVolume(swap.InType, swap.InQuantity, true);
+                    addAssetVolume(swap.InType, swap.InQuantity, true);
                 }
 
                 foreach(var vin in block_tx.vin)
@@ -193,14 +204,7 @@ namespace raven_trader_server.Services
                             var asset_name = vout.scriptPubKey.asset.name.ToString();
                             var quantity = (float)vout.scriptPubKey.asset.amount;
 
-                            RC_AssetVolume vol = assetVolumes.ContainsKey(asset_name) ? assetVolumes[asset_name] : new RC_AssetVolume()
-                            {
-                                AssetName = asset_name,
-                                Block = blockNumber,
-                            };
-
-                            vol.TransactionVolume += quantity;
-                            assetVolumes[asset_name] = vol;
+                            addAssetVolume(asset_name, quantity, false);
                             break;
                         case Constants.VOUT_TYPE_ISSUE_ASSET:
                         case Constants.VOUT_TYPE_REISSUE_ASSET:

@@ -73,7 +73,7 @@ namespace raven_trader_server.Controllers
 
             var swapQuery = _db.Listings.AsQueryable().Where(l => l.Active);
             if (!string.IsNullOrEmpty(assetName))
-                swapQuery = swapQuery.Where(s => s.AssetName == assetName);
+                swapQuery = swapQuery.Where(s => s.InType == assetName || s.OutType == assetName);
             if (!string.IsNullOrEmpty(swapType) && Enum.TryParse<SwapType>(swapType, out var parsedType))
                 swapQuery = swapQuery.Where(s => s.OrderType == parsedType);
 
@@ -96,7 +96,7 @@ namespace raven_trader_server.Controllers
             var swapQuery = _db.Swaps.AsQueryable();
 
             if (!string.IsNullOrEmpty(assetName))
-                swapQuery = swapQuery.Where(s => s.AssetName == assetName);
+                swapQuery = swapQuery.Where(s => s.InType == assetName || s.OutType == assetName);
             if (!string.IsNullOrEmpty(swapType) && Enum.TryParse<SwapType>(swapType, out var parsedType))
                 swapQuery = swapQuery.Where(s => s.Type == parsedType);
 
