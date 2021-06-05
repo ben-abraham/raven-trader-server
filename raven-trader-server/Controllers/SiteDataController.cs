@@ -93,8 +93,8 @@ namespace raven_trader_server.Controllers
                     .OrderBy(l => l.UnitPrice);
 
                 var buyOrders = assetOrders.Where(l => l.OrderType == SwapType.Sell).ToList();
-                var sellOrders = listQuery.Where(l => l.OrderType == SwapType.Buy).ToList();
-                var tradeOrders = listQuery.Where(l => l.OrderType == SwapType.Trade).ToList();
+                var sellOrders = assetOrders.Where(l => l.OrderType == SwapType.Buy).ToList();
+                var tradeOrders = assetOrders.Where(l => l.OrderType == SwapType.Trade).ToList();
 
                 //Buy/Sell perspective is reversed as always here
                 return new
