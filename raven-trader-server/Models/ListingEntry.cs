@@ -81,16 +81,16 @@ namespace raven_trader_server.Models
             var src_transaction = (dynamic)rpc.GetRawTransaction((string)parsed_tx.vin[0].txid);
             var src_vout = src_transaction.vout[(int)parsed_tx.vin[0].vout];
 
-            var in_type = src_vout?.scriptPubKey?.type;
-            var out_Type = parsed_tx.vout[0]?.scriptPubKey?.type;
+            var in_type = (src_vout?.scriptPubKey?.asset != null) ? "asset" : "rvn";
+            var out_Type = (parsed_tx.vout[0]?.scriptPubKey?.asset != null) ? "asset" : "rvn";
 
             SwapType? type = null;
 
-            if (in_type == Constants.VOUT_TYPE_TRANSFER_ASSET && out_Type == Constants.VOUT_TYPE_TRANSFER_ASSET)
+            if (in_type == "asset" && out_Type == "asset")
                 type = SwapType.Trade;
-            else if (out_Type == Constants.VOUT_TYPE_TRANSFER_ASSET)
+            else if (out_Type == "asset")
                 type = SwapType.Buy;
-            else if (in_type == Constants.VOUT_TYPE_TRANSFER_ASSET)
+            else if (in_type == "asset")
                 type = SwapType.Sell;
 
             if(type == null)
