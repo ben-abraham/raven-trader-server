@@ -72,30 +72,29 @@ namespace raven_trader_server.Controllers
             if (pageSize > Constants.MAX_PAGE_SIZE) pageSize = Constants.MAX_PAGE_SIZE;
 
             //A bit expensive to look through all orders like this, but for now its okay :shrug:
-            var swapQuery = _db.Listings.AsQueryable().Where(l => l.Active);
+            var listQuery = _db.Listings.AsQueryable().Where(l => l.Active);
             if (!string.IsNullOrEmpty(assetName))
-                swapQuery = swapQuery.Where(s => s.InType.Contains(assetName) || s.OutType.Contains(assetName));
+                listQuery = listQuery.Where(s => s.InType.Contains(assetName) || s.OutType.Contains(assetName));
             
-            var assetList = swapQuery.Select(l => l.OutType).Union(swapQuery.Select(l => l.InType))
+            var assetList = listQuery.Select(l => l.OutType).Union(listQuery.Select(l => l.InType))
                 .Where(t => t != "rvn")
+                .Distinct()
                 .OrderBy(t => t)
                 .ToList();
 
             int totalCount = assetList.Count();
             var pageAssets = assetList.Skip(offset).Take(pageSize);
 
-            //Note: This is not SQL based and is therefore expesive AF
+            //Note: This is not SQL optimized and is therefore expesive AF
             var assetResult = pageAssets.Select(pa =>
             {
-                var buyOrders = _db.Listings
-                        .Where(l => l.OrderType == SwapType.Sell && l.InType.Contains(pa))
-                        .OrderBy(l => l.UnitPrice);
-                var sellOrders = _db.Listings
-                        .Where(l => l.OrderType == SwapType.Buy && l.OutType.Contains(pa))
-                        .OrderByDescending(l => l.UnitPrice);
-                var tradeOrders = _db.Listings
-                        .Where(l => l.OrderType == SwapType.Trade && (l.InType.Contains(pa) || l.OutType.Contains(pa)))
-                        .OrderByDescending(l => l.UnitPrice);
+                var assetOrders = listQuery
+                    .Where(l => l.InType.Contains(pa) || l.OutType.Contains(pa))
+                    .OrderBy(l => l.UnitPrice);
+
+                var buyOrders = assetOrders.Where(l => l.OrderType == SwapType.Sell).ToList();
+                var sellOrders = listQuery.Where(l => l.OrderType == SwapType.Buy).ToList();
+                var tradeOrders = listQuery.Where(l => l.OrderType == SwapType.Trade).ToList();
 
                 //Buy/Sell perspective is reversed as always here
                 return new
@@ -106,7 +105,7 @@ namespace raven_trader_server.Controllers
                     MinBuy = buyOrders.FirstOrDefault(),
                     SellOrders = sellOrders.Count(),
                     SellQuantity = sellOrders.Sum(o => o.InQuantity),
-                    MaxSell = sellOrders.FirstOrDefault(),
+                    MaxSell = sellOrders.LastOrDefault(),
                     TradeOrders = tradeOrders.Count(),
                     TradeQuantity = tradeOrders.Sum(o => o.InType == pa ? o.InQuantity : o.OutQuantity),
                     Trades = tradeOrders.FirstOrDefault()
