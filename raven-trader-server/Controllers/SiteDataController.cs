@@ -89,7 +89,7 @@ namespace raven_trader_server.Controllers
             var assetResult = pageAssets.Select(pa =>
             {
                 var assetOrders = listQuery
-                    .Where(l => l.InType.Contains(pa) || l.OutType.Contains(pa))
+                    .Where(l => l.InType == pa || l.OutType == pa)
                     .OrderBy(l => l.UnitPrice);
 
                 var buyOrders = assetOrders.Where(l => l.OrderType == SwapType.Sell).ToList();
