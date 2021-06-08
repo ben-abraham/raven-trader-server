@@ -185,6 +185,7 @@ namespace raven_trader_server.Controllers
             var child_assets = _rpc.ListAssets($"{assetName}/*");
 
             var assetOrders = _db.Listings.AsQueryable()
+                .Where(l => l.Active)
                 .Where(l => l.InType == assetName || l.OutType == assetName)
                 .OrderBy(l => l.UnitPrice);
 
