@@ -29,21 +29,21 @@
               <ng-container *ngFor="let swap of results.swaps">
                 <ng-container [ngSwitch]="swap.orderType">
                   <tr *ngSwitchCase="SwapType.Buy">
-                    <td>{{ swap.outType }}</td>
+                    <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
                     <td>{{ swap.outQuantity }}</td>
                     <td>{{ swap.unitPrice }} RVN</td>
                     <td>{{ swap.inQuantity }} RVN</td>
                     <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
                   </tr>
                   <tr *ngSwitchCase="SwapType.Sell">
-                    <td>{{ swap.inType }}</td>
+                    <td><a [routerLink]="['/asset', swap.inType]">{{ swap.inType }}</a></td>
                     <td>{{ swap.inQuantity }}</td>
                     <td>{{ swap.unitPrice }} RVN</td>
                     <td>{{ swap.outQuantity }} RVN</td>
                     <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
                   </tr>
                   <tr *ngSwitchCase="SwapType.Trade">
-                    <td>{{ swap.outType }}</td>
+                    <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
                     <td>{{ swap.outQuantity }}</td>
                     <td>{{ swap.unitPrice }} {{ swap.inType }}</td>
                     <td>{{ swap.inQuantity }} {{ swap.inType }}</td>

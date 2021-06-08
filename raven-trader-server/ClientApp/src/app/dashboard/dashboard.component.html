@@ -25,7 +25,7 @@
             <tbody>
               <ng-container *ngFor="let volEntry of assetVol">
                 <tr *ngIf="volEntry.AssetName.endsWith('!') ? showAdmin : true">
-                  <td>{{ volEntry.AssetName }}</td>
+                  <td><a [routerLink]="['/asset', volEntry.AssetName]">{{ volEntry.AssetName }}</a></td>
                   <td>###</td>
                   <td>{{ volEntry.TotalVolume }}</td>
                   <td>{{ volEntry.SwapVolume }}</td>
@@ -62,21 +62,21 @@
               <ng-container *ngFor="let swap of swaps">
                 <ng-container [ngSwitch]="swap.orderType">
                   <tr *ngSwitchCase="SwapType.Buy">
-                    <td>{{ swap.outType }}</td>
+                    <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
                     <td>{{ swap.block }}</td>
                     <td>{{ SwapType[swap.orderType] }}</td>
                     <td>{{ swap.outQuantity }}x @ {{ swap.unitPrice }} RVN ea.</td>
                     <td>{{ swap.inQuantity }} RVN</td>
                   </tr>
                   <tr *ngSwitchCase="SwapType.Sell">
-                    <td>{{ swap.inType }}</td>
+                    <td><a [routerLink]="['/asset', swap.inType]">{{ swap.inType }}</a></td>
                     <td>{{ swap.block }}</td>
                     <td>{{ SwapType[swap.orderType] }}</td>
                     <td>{{ swap.inQuantity }}x @ {{ swap.unitPrice }} RVN ea.</td>
                     <td>{{ swap.outQuantity }} RVN</td>
                   </tr>
                   <tr *ngSwitchCase="SwapType.Trade">
-                    <td>{{ swap.outType }}</td>
+                    <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
                     <td>{{ swap.block }}</td>
                     <td>{{ SwapType[swap.orderType] }}</td>
                     <td>{{ swap.outQuantity }}x @ {{ swap.unitPrice }}x {{ swap.inType }} ea.</td>

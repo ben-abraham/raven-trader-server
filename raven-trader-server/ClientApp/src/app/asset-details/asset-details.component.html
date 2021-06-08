@@ -157,7 +157,11 @@
               <ng-container *ngFor="let swap of assetDetails['trades']">
                 <ng-container [ngSwitch]="swap.orderType">
                   <tr *ngSwitchCase="SwapType.Trade">
-                    <td>{{ swap.outType === assetName ? swap.inType : swap.outType }}</td>
+                    <td>
+                      <a [routerLink]="['/asset', swap.outType === assetName ? swap.inType : swap.outType]">
+                        {{ swap.outType === assetName ? swap.inType : swap.outType }}
+                      </a>
+                    </td>
                     <td>{{ swap.unitPrice | number:'1.0-8' }}</td>
                     <td>{{ swap.outType === assetName ? swap.inQuantity : swap.outQuantity | number:'1.0-8' }}</td>
                     <td>{{ swap.outType === assetName ? swap.outQuantity : swap.inQuantity | number:'1.0-8' }}</td>
