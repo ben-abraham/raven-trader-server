@@ -1,0 +1,175 @@
+<h1>Asset Details: {{ assetName }}</h1>
+
+<div class="row">
+
+
+  <div class="col-lg-4 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h5 *ngIf="!assetDetails">
+          Loading Details...
+        </h5>
+        <div *ngIf="assetDetails">
+          <h4 class="card-title">Asset Details</h4>
+          <div style="padding-left: 25px">
+            <h6>Total Supply: {{ assetDetails.amount }}</h6>
+            <h6>Units: {{ assetDetails.units }} ({{assetDetails.denomination}} = smallest denomination)</h6>
+            <h6>Re-Issuable: {{ assetDetails.reissuable ? 'Yes' : 'No' }}</h6>
+            <h6 *ngIf="assetDetails.ipfs"><a target="_blank" href="https://ravencoinipfs-gateway.com/ipfs/{{ assetDetails.ipfs }}">IPFS Data</a></h6>
+            <h5 *ngIf="parentName">Parent Asset: <a [routerLink]="['/asset', parentName]">{{ parentName }}</a></h5>
+            <h5 *ngIf="assetDetails.children.length > 0">{{assetDetails.children.length}} Child Assets</h5>
+            <ul *ngIf="assetDetails.children.length > 0">
+              <ng-container *ngFor="let child of assetDetails.children">
+                <li>
+                  <a [routerLink]="['/asset', child]">{{ child }}</a>
+                </li>
+              </ng-container>
+            </ul>
+          </div>
+        </div>
+
+
+        <h5 *ngIf="!assetHistory">
+          Loading History...
+        </h5>
+        <div class="table-responsive" *ngIf="assetHistory">
+          <h4 class="card-title">Swap History</h4>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Block</th>
+                <th>Type</th>
+                <th>Order</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let swap of assetHistory">
+                <ng-container [ngSwitch]="swap.orderType">
+                  <tr *ngSwitchCase="SwapType.Buy">
+                    <td>{{ swap.block }}</td>
+                    <td>{{ SwapType[swap.orderType] }}</td>
+                    <td>{{ swap.outQuantity | number:'1.0-8' }}x @ {{ swap.unitPrice | number:'1.0-8' }} RVN ea.</td>
+                    <td>{{ swap.inQuantity | number:'1.0-8' }} RVN</td>
+                  </tr>
+                  <tr *ngSwitchCase="SwapType.Sell">
+                    <td>{{ swap.block }}</td>
+                    <td>{{ SwapType[swap.orderType] }}</td>
+                    <td>{{ swap.inQuantity | number:'1.0-8' }}x @ {{ swap.unitPrice | number:'1.0-8' }} RVN ea.</td>
+                    <td>{{ swap.outQuantity | number:'1.0-8' }} RVN</td>
+                  </tr>
+                  <tr *ngSwitchCase="SwapType.Trade">
+                    <td>{{ swap.block }}</td>
+                    <td>{{ SwapType[swap.orderType] }}</td>
+                    <td>{{ swap.outQuantity | number:'1.0-8' }}x @ {{ swap.unitPrice | number:'1.0-8' }}x {{ swap.inType }} ea.</td>
+                    <td>{{ swap.inQuantity | number:'1.0-8' }}x {{ swap.inType }}</td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h5 *ngIf="!assetDetails">
+          Loading...
+        </h5>
+        <div class="table-responsive" *ngIf="assetDetails">
+
+          <h4 class="card-title">{{assetDetails.buyOrders}} Buy Orders ({{assetDetails.buyQuantity | number:'1.0-8'}})</h4>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Hex</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let swap of assetDetails.buys">
+                <ng-container [ngSwitch]="swap.orderType">
+                  <tr *ngSwitchCase="SwapType.Sell">
+                    <td>{{ swap.unitPrice | number:'1.0-8' }} RVN</td>
+                    <td>{{ swap.inQuantity | number:'1.0-8' }}x</td>
+                    <td>{{ swap.outQuantity | number:'1.0-8' }} RVN</td>
+                    <td><a href="" (click)="showDetails($event, swap); false">Hex</a></td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </table>
+
+          <h4 class="card-title">{{assetDetails.sellOrders}} Sell Orders ({{assetDetails.sellQuantity | number:'1.0-8'}})</h4>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Hex</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let swap of assetDetails.sells">
+                <ng-container [ngSwitch]="swap.orderType">
+                  <tr *ngSwitchCase="SwapType.Sell">
+                    <td>{{ swap.unitPrice | number:'1.0-8' }} RVN</td>
+                    <td>{{ swap.inQuantity | number:'1.0-8' }}x</td>
+                    <td>{{ swap.outQuantity | number:'1.0-8' }} RVN</td>
+                    <td><a href="" (click)="showDetails($event, swap); false">Hex</a></td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+
+        <h4 class="card-title">Trades</h4>
+
+        <h5 *ngIf="!assetDetails">
+          Loading...
+        </h5>
+        <div class="table-responsive" *ngIf="assetDetails">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Hex</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let swap of assetDetails['trades']">
+                <ng-container [ngSwitch]="swap.orderType">
+                  <tr *ngSwitchCase="SwapType.Trade">
+                    <td>{{ swap.outType === assetName ? swap.inType : swap.outType }}</td>
+                    <td>{{ swap.unitPrice | number:'1.0-8' }}</td>
+                    <td>{{ swap.outType === assetName ? swap.inQuantity : swap.outQuantity | number:'1.0-8' }}</td>
+                    <td>{{ swap.outType === assetName ? swap.outQuantity : swap.inQuantity | number:'1.0-8' }}</td>
+                    <td><a href="" (click)="showDetails($event, swap); false">Hex</a></td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

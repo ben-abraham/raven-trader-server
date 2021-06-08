@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Subject, Observable, ReplaySubject } from 'rxjs';
 
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+
+export enum SwapType {
+  Buy = 0,
+  Sell = 1,
+  Trade = 2
+}
 
 @Injectable()
 export class DataService {
@@ -26,9 +32,24 @@ export class DataService {
 
   public queryListings(assetName: string = null, swapType: SwapType = null): Observable<DTOListingResults> {
     let params = new HttpParams();
-    params.append("assetName", assetName);
-    params.append("swapType", swapType ? SwapType[swapType] : null);
+    params = params.append("assetName", assetName);
+    params = params.append("swapType", swapType ? SwapType[swapType] : null);
     return this.http.get<DTOListingResults>('api/sitedata/listings', { params: params });
+  }
+
+  public queryHistory(assetName: string = null, swapType: SwapType = null): Observable<DTOHistoryResults> {
+    let params = new HttpParams();
+    params = params.append("assetName", assetName);
+    params = params.append("swapType", swapType ? SwapType[swapType] : null);
+    return this.http.get<DTOHistoryResults>('api/sitedata/swaphistory', { params: params });
+  }
+
+  public queryAsset(assetName: string): Observable<DTOAssetSearchResults> {
+    let headers = new HttpHeaders();
+    headers = headers.append('Content-Type', 'application/json');
+    let params = new HttpParams();
+    params = params.append("assetName", assetName);
+    return this.http.get<DTOAssetSearchResults>('api/sitedata/asset', { headers: headers, params: params });
   }
 
   //Stringify only works for post
@@ -101,6 +122,31 @@ export interface DTOListingResults {
   totalCount: number;
 }
 
+export interface DTOHistoryResults {
+  swaps: DTOSwap[];
+  offset: number;
+  totalCount: number;
+}
+
+export interface DTOAssetSearchResults {
+  asset: string;
+  children: string[];
+  units: number;
+  denomination: number;
+  amount: number;
+  ipfs: string;
+  reissuable: boolean;
+  buyOrders: number;
+  buyQuantity: number;
+  buys: DTOAssetListing[];
+  sellOrders: number;
+  sellQuantity: number;
+  sells: DTOAssetListing[];
+  tradeOrders: number;
+  tradeQuantity: number;
+  trades: DTOAssetListing[];
+}
+
 export interface DTOAssetListing extends SwapDetails {
   utxo: string;
   b64SignedPartial: string;
@@ -111,8 +157,3 @@ export interface DTOParseSignedPartial {
   result: DTOAssetListing;
 }
 
-export enum SwapType {
-  Buy = 0,
-  Sell = 1,
-  Trade = 2
-}

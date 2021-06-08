@@ -13,7 +13,7 @@ namespace raven_trader_server.Models
         public int Block { get; set; }
 
 
-        public SwapType Type { get; set; }
+        public SwapType OrderType { get; set; }
 
         public string InType { get; set; }
         public string OutType { get; set; }
@@ -23,11 +23,11 @@ namespace raven_trader_server.Models
         {
             get
             {
-                if (Type == SwapType.Buy)
+                if (OrderType == SwapType.Buy)
                     return InQuantity / OutQuantity;
-                else if (Type == SwapType.Sell)
+                else if (OrderType == SwapType.Sell)
                     return OutQuantity / InQuantity;
-                else if (Type == SwapType.Trade)
+                else if (OrderType == SwapType.Trade)
                     return InQuantity / OutQuantity;
                 else
                     return 0;

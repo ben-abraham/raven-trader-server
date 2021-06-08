@@ -1,5 +1,6 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { DataService, DTOParseSignedPartial, SwapType, DTOAssetListing } from './services/data.service';
+import { Router } from '@angular/router';
 
 declare const $: any; //jQuery hack
 
@@ -14,15 +15,61 @@ export class AppComponent implements OnInit {
 
   @ViewChild("swapHex", { static: true }) public swapHex: ElementRef;
 
+  public previewModeTypeRemap: any = {
+    0: "Sale", //SwapType.Buy
+    1: "Purchase", //SwapType.Sell
+    2: "Trade" //SwapType.Trade
+  };
+
   public signedPartialEntry = "";
   public signedPartialData: DTOParseSignedPartial = null;
 
+  public searchText: string;
+  public lastSearch: string;
+
   public previewMode = false;
 
-  public constructor(public dataService: DataService) {
+  public constructor(public dataService: DataService, private router: Router) {
   }
 
   ngOnInit(): void {
+  }
+
+  omnisearchSubmit(e: Event): void {
+    if (this.searchText === this.lastSearch) return;
+    this.lastSearch = this.searchText
+    console.log("Omni-Search Submitted - " + this.searchText)
+
+    let searchType = "unknown";
+
+    if (/[0-9a-zA-Z]{64}/.test(this.searchText)) {
+      //TXID/Blockhash
+      searchType = "Hex64";
+    } else if (this.searchText.length >= 4 && this.searchText.length < 31) {
+      //Asset name (fallback)
+      searchType = "Asset"
+    }
+
+    switch (searchType) {
+      case "Hex64":
+        //TODO: Ask server to check this hash for us
+        console.log("Womp Womp");
+        break;
+      case "Asset":
+        console.log("Asset");
+        this.router.navigate(["/asset", this.searchText])
+        break;
+      case "unknown":
+        console.log("Unknown search type");
+        break;
+    }
+  }
+
+  handleKeyUp(e: KeyboardEvent) {
+    //console.log(e.keyCode)
+    if (e.keyCode === 13) {
+      //this.omnisearchSubmit(e);
+    }
   }
 
   showDetails(listing: DTOAssetListing): void {

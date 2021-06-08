@@ -12,12 +12,14 @@ namespace raven_trader_server.Controllers
     [ApiController]
     public class SiteDataController : ControllerBase
     {
-        public SiteDataController(RTDbContext db)
+        public SiteDataController(RTDbContext db, RVN_RPC rpc)
         {
             _db = db;
+            _rpc = rpc;
         }
 
         public RTDbContext _db { get; }
+        public RVN_RPC _rpc { get; }
 
         [HttpGet]
         public JsonResult Get()
@@ -145,16 +147,19 @@ namespace raven_trader_server.Controllers
 
         [HttpGet]
         [Route("swaphistory")]
-        public JsonResult GetHistory(string assetName, string swapType, int pageSize = 100, int offset = 0)
+        public JsonResult GetHistory(string assetName, string swapType, bool searchAny = false, int pageSize = 100, int offset = 0)
         {
             if (pageSize > Constants.MAX_PAGE_SIZE) pageSize = Constants.MAX_PAGE_SIZE;
 
             var swapQuery = _db.Swaps.AsQueryable();
 
             if (!string.IsNullOrEmpty(assetName))
-                swapQuery = swapQuery.Where(s => s.InType.Contains(assetName) || s.OutType.Contains(assetName));
+                if(searchAny)
+                    swapQuery = swapQuery.Where(s => s.InType.Contains(assetName) || s.OutType.Contains(assetName));
+                else
+                    swapQuery = swapQuery.Where(s => s.InType == assetName || s.OutType == assetName);
             if (!string.IsNullOrEmpty(swapType) && Enum.TryParse<SwapType>(swapType, out var parsedType))
-                swapQuery = swapQuery.Where(s => s.Type == parsedType);
+                swapQuery = swapQuery.Where(s => s.OrderType == parsedType);
 
             var finalQuery = swapQuery.OrderByDescending(s => s.Block).Skip(offset).Take(pageSize);
             var totalCount = swapQuery.Count();
@@ -164,6 +169,47 @@ namespace raven_trader_server.Controllers
                 offset = offset,
                 totalCount = totalCount,
                 swaps = finalQuery.ToArray()
+            });
+        }
+
+        [HttpGet]
+        [Route("asset")]
+        public JsonResult GetAssetDetails(string assetName)
+        {
+            //TODO: NO RPC CALLS DURING WEB REQUESTS UNLESS NEEDED
+            //TODO: Properly Validate asset name input
+            if (assetName == null || assetName.Length > 31 || assetName.Length < 4)
+                return new JsonResult(null);
+            
+            var asset_data = _rpc.GetAssetData(assetName);
+            var child_assets = _rpc.ListAssets($"{assetName}/*");
+
+            var assetOrders = _db.Listings.AsQueryable()
+                .Where(l => l.InType == assetName || l.OutType == assetName)
+                .OrderBy(l => l.UnitPrice);
+
+            var buyOrders = assetOrders.Where(l => l.OrderType == SwapType.Sell).Reverse().Take(100).ToList();
+            var sellOrders = assetOrders.Where(l => l.OrderType == SwapType.Buy).Take(100).ToList();
+            var tradeOrders = assetOrders.Where(l => l.OrderType == SwapType.Trade).Take(100).ToList();
+
+            return new JsonResult(new
+            {
+                Asset = assetName,
+                Children = child_assets,
+                Units = asset_data.Value<int>("units"),
+                Denomination = 1 / Math.Pow(10, asset_data.Value<int>("units")),
+                Amount = asset_data.Value<float>("amount"),
+                ipfs = asset_data.ContainsKey("ipfs_hash") ? asset_data.Value<string>("ipfs_hash") : null,
+                Reissuable = asset_data.Value<int>("reissuable") == 1,
+                BuyOrders = buyOrders.Count(),
+                BuyQuantity = buyOrders.Sum(o => o.OutQuantity),
+                Buys = buyOrders,
+                SellOrders = sellOrders.Count(),
+                SellQuantity = sellOrders.Sum(o => o.InQuantity),
+                Sells = sellOrders,
+                TradeOrders = tradeOrders.Count(),
+                TradeQuantity = tradeOrders.Sum(o => o.InType == assetName ? o.InQuantity : o.OutQuantity),
+                Trades = tradeOrders
             });
         }
     }

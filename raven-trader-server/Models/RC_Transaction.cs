@@ -63,7 +63,7 @@ namespace raven_trader_server.Models
                 {
                     TXID = txid,
                     Block = Block,
-                    Type = SwapType.Trade,
+                    OrderType = SwapType.Trade,
                     InType = swap_setup_src_vout.scriptPubKey.asset.name,
                     InQuantity = swap_setup_src_vout.scriptPubKey.asset.amount,
                     OutType = swap_setup_vout.scriptPubKey.asset.name,
@@ -77,7 +77,7 @@ namespace raven_trader_server.Models
                 {
                     TXID = txid,
                     Block = Block,
-                    Type = SwapType.Buy,
+                    OrderType = SwapType.Buy,
                     InType = "rvn",
                     InQuantity = swap_setup_src_vout.value,
                     OutType = swap_setup_vout.scriptPubKey.asset.name,
@@ -91,7 +91,7 @@ namespace raven_trader_server.Models
                 {
                     TXID = txid,
                     Block = Block,
-                    Type = SwapType.Sell,
+                    OrderType = SwapType.Sell,
                     InType = swap_setup_src_vout.scriptPubKey.asset.name,
                     InQuantity = swap_setup_src_vout.scriptPubKey.asset.amount,
                     OutType = "rvn",

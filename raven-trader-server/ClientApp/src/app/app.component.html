@@ -26,8 +26,8 @@
           </button>
           <ul class="navbar-nav w-100">
             <li class="nav-item w-100">
-              <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search">
-                <input type="text" class="form-control" placeholder="Search Assets, Transactions, Swaps, etc.">
+              <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search"  (ngSubmit)="omnisearchSubmit($event)" (keyup)="handleKeyUp($event)">
+                <input type="text" class="form-control" name="searchText" placeholder="Search Assets" [(ngModel)]="searchText" >
               </form>
             </li>
           </ul>
@@ -83,11 +83,11 @@
               <div class="col-sm-4">
                 <input type="text" readonly id="staticType" class="form-control-greytext"
                   *ngIf="signedPartialData?.result"
-                  value="{{ SwapType[signedPartialData.result.orderType] }}">
+                  value="{{ previewMode ? previewModeTypeRemap[signedPartialData.result.orderType] : SwapType[signedPartialData.result.orderType] }}">
               </div>
             </div>
             <div class="form-group row">
-              <label for="staticInput" class="col-sm-2 col-form-label">Input:</label>
+              <label for="staticInput" class="col-sm-2 col-form-label">{{ previewMode ? 'Recieve' : 'Input:' }}</label>
               <div class="col-sm-4" [ngSwitch]="signedPartialData?.result?.orderType">
                 <label type="text" readonly id="staticInput" class="form-control-greytext"
                        *ngSwitchCase="SwapType.Buy">{{ signedPartialData.result.inQuantity | number:'1.0-8' }} RVN </label>
@@ -96,7 +96,7 @@
                 <label type="text" readonly id="staticInput" class="form-control-greytext"
                        *ngSwitchCase="SwapType.Trade">{{ signedPartialData.result.inQuantity | number:'1.0-8' }} {{ signedPartialData.result.inType }} </label>
               </div>
-              <label for="staticOutput" class="col-sm-2 col-form-label">Output:</label>
+              <label for="staticOutput" class="col-sm-2 col-form-label">{{ previewMode ? 'Send' : 'Output:' }}</label>
               <div class="col-sm-4" [ngSwitch]="signedPartialData?.result?.orderType">
                 <label type="text" readonly id="staticOutput" class="form-control-greytext"
                        *ngSwitchCase="SwapType.Buy">{{ signedPartialData.result.outQuantity | number:'1.0-8' }} {{ signedPartialData.result.outType }} </label>

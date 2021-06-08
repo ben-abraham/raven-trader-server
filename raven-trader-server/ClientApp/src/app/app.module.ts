@@ -12,6 +12,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { SwapListComponent } from './swaps/swaps.component';
 
 import { DataService } from './services/data.service';
+import { AssetDetailsComponent } from './asset-details/asset-details.component';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import { DataService } from './services/data.service';
     NavMenuComponent,
     HomeComponent,
     DashboardComponent,
-    SwapListComponent
+    SwapListComponent,
+    AssetDetailsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -31,6 +33,7 @@ import { DataService } from './services/data.service';
       { path: '', component: DashboardComponent, pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'swaps', component: SwapListComponent },
+      { path: 'asset/:name', component: AssetDetailsComponent }
     ])
   ],
   providers: [DataService],

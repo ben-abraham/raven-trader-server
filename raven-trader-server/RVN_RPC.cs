@@ -72,6 +72,18 @@ namespace raven_trader_server
             return DoRPC("gettxout", payload).Result;
         }
 
+        internal JObject GetAssetData(string AssetName)
+        {
+            JObject payload = JObject.FromObject(new { asset_name = AssetName });
+            return DoRPC("getassetdata", payload).Result;
+        }
+
+        internal List<string> ListAssets(string SearchString)
+        {
+            JObject payload = JObject.FromObject(new { asset = SearchString });
+            return DoRPC<List<string>>("listassets", payload).Result;
+        }
+
         internal int GetNumBlocks()
         {
             return DoRPC<int>("getblockcount").Result;
