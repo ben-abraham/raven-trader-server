@@ -25,16 +25,16 @@
           <ng-template #assetListBodyTemplate let-asset>
             <tr>
               <td><a [routerLink]="['/asset', asset.asset]">{{ asset.asset }}</a></td>
-              <td>{{ asset.buyOrders }} ({{ asset.buyQuantity }})</td>
-              <td>{{ asset.sellOrders }} ({{ asset.sellQuantity }})</td>
-              <td>{{ asset.tradeOrders }} ({{ asset.tradeQuantity }})</td>
+              <td>{{ asset.buyOrders }} ({{ asset.buyQuantity | number:'1.0-8' }})</td>
+              <td>{{ asset.sellOrders }} ({{ asset.sellQuantity | number:'1.0-8' }})</td>
+              <td>{{ asset.tradeOrders }} ({{ asset.tradeQuantity | number:'1.0-8' }})</td>
               <td>
                 <span *ngIf="!asset.minBuy">No Buy Available</span>
-                <a *ngIf="asset.minBuy" href="" (click)="showDetails($event, asset.minBuy); false">{{ asset.minBuy.inQuantity }}x @ {{ asset.minBuy.unitPrice }} RVN ea.</a>
+                <a *ngIf="asset.minBuy" href="" (click)="showDetails($event, asset.minBuy); false">{{ asset.minBuy.inQuantity | number:'1.0-8' }}x @ {{ asset.minBuy.unitPrice | number:'1.0-8' }} RVN ea.</a>
               </td>
               <td>
                 <span *ngIf="!asset.maxSell">No Sell Available</span>
-                <a *ngIf="asset.maxSell" href="" (click)="showDetails($event, asset.maxSell); false">{{ asset.maxSell.outQuantity }}x @ {{ asset.maxSell.unitPrice }} RVN ea.</a>
+                <a *ngIf="asset.maxSell" href="" (click)="showDetails($event, asset.maxSell); false">{{ asset.maxSell.outQuantity | number:'1.0-8' }}x @ {{ asset.maxSell.unitPrice | number:'1.0-8' }} RVN ea.</a>
               </td>
             </tr>
           </ng-template>

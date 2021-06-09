@@ -26,25 +26,25 @@
               <tr *ngSwitchCase="SwapType.Buy">
                 <td>{{ SwapType[swap.orderType] }}</td>
                 <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
-                <td>{{ swap.outQuantity }}</td>
-                <td>{{ swap.unitPrice }} RVN</td>
-                <td>{{ swap.inQuantity }} RVN</td>
+                <td>{{ swap.outQuantity | number:'1.0-8' }}</td>
+                <td>{{ swap.unitPrice | number:'1.0-8' }} RVN</td>
+                <td>{{ swap.inQuantity | number:'1.0-8' }} RVN</td>
                 <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
               </tr>
               <tr *ngSwitchCase="SwapType.Sell">
                 <td>{{ SwapType[swap.orderType] }}</td>
                 <td><a [routerLink]="['/asset', swap.inType]">{{ swap.inType }}</a></td>
-                <td>{{ swap.inQuantity }}</td>
-                <td>{{ swap.unitPrice }} RVN</td>
-                <td>{{ swap.outQuantity }} RVN</td>
+                <td>{{ swap.inQuantity | number:'1.0-8' }}</td>
+                <td>{{ swap.unitPrice | number:'1.0-8' }} RVN</td>
+                <td>{{ swap.outQuantity | number:'1.0-8' }} RVN</td>
                 <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
               </tr>
               <tr *ngSwitchCase="SwapType.Trade">
                 <td>{{ SwapType[swap.orderType] }}</td>
                 <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
-                <td>{{ swap.outQuantity }}</td>
-                <td>{{ swap.unitPrice }} {{ swap.inType }}</td>
-                <td>{{ swap.inQuantity }} {{ swap.inType }}</td>
+                <td>{{ swap.outQuantity | number:'1.0-8' }}</td>
+                <td>{{ swap.unitPrice | number:'1.0-8' }} {{ swap.inType }}</td>
+                <td>{{ swap.inQuantity | number:'1.0-8' }} {{ swap.inType }}</td>
                 <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
               </tr>
             </ng-container>

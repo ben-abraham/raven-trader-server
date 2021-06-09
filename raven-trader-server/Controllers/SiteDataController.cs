@@ -99,7 +99,7 @@ namespace raven_trader_server.Controllers
                 var buyOrders = assetOrders.Where(l => l.OrderType == SwapType.Sell)
                     .OrderBy(l => l.UnitPrice).ThenBy(l => l.InQuantity).ToList();
                 var sellOrders = assetOrders.Where(l => l.OrderType == SwapType.Buy)
-                    .OrderBy(l => l.UnitPrice).ThenBy(l => l.OutQuantity).ToList();
+                    .OrderByDescending(l => l.UnitPrice).ThenBy(l => l.OutQuantity).ToList();
                 var tradeOrders = assetOrders.Where(l => l.OrderType == SwapType.Trade)
                     .OrderBy(l => l.UnitPrice).ThenBy(l => l.InType == pa ? l.InQuantity : l.OutQuantity).ToList();
 
@@ -108,7 +108,7 @@ namespace raven_trader_server.Controllers
                     Asset = pa,
                     BuyOrders = buyOrders.Count(),
                     BuyQuantity = buyOrders.Sum(o => o.InQuantity),
-                    MinBuy = buyOrders.LastOrDefault(), //Last on buys (sells) to account for reverse prices
+                    MinBuy = buyOrders.FirstOrDefault(),
                     SellOrders = sellOrders.Count(),
                     SellQuantity = sellOrders.Sum(o => o.OutQuantity),
                     MaxSell = sellOrders.FirstOrDefault(),
