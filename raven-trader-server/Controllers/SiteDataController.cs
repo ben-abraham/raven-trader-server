@@ -104,10 +104,10 @@ namespace raven_trader_server.Controllers
                 {
                     Asset = pa,
                     BuyOrders = buyOrders.Count(),
-                    BuyQuantity = buyOrders.Sum(o => o.OutQuantity),
+                    BuyQuantity = buyOrders.Sum(o => o.InQuantity),
                     MinBuy = buyOrders.LastOrDefault(), //Last on buys (sells) to account for reverse prices
                     SellOrders = sellOrders.Count(),
-                    SellQuantity = sellOrders.Sum(o => o.InQuantity),
+                    SellQuantity = sellOrders.Sum(o => o.OutQuantity),
                     MaxSell = sellOrders.FirstOrDefault(),
                     TradeOrders = tradeOrders.Count(),
                     TradeQuantity = tradeOrders.Sum(o => o.InType == pa ? o.InQuantity : o.OutQuantity)
@@ -211,10 +211,10 @@ namespace raven_trader_server.Controllers
                 ipfs = asset_data.ContainsKey("ipfs_hash") ? asset_data.Value<string>("ipfs_hash") : null,
                 Reissuable = asset_data.Value<int>("reissuable") == 1,
                 BuyOrders = buyOrders.Count(),
-                BuyQuantity = buyOrders.Sum(o => o.OutQuantity),
+                BuyQuantity = buyOrders.Sum(o => o.InQuantity),
                 Buys = buyOrders,
                 SellOrders = sellOrders.Count(),
-                SellQuantity = sellOrders.Sum(o => o.InQuantity),
+                SellQuantity = sellOrders.Sum(o => o.OutQuantity),
                 Sells = sellOrders,
                 TradeOrders = tradeOrders.Count(),
                 TradeQuantity = tradeOrders.Sum(o => o.InType == assetName ? o.InQuantity : o.OutQuantity),
