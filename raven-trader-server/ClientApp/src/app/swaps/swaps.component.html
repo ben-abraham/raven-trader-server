@@ -10,50 +10,42 @@
           <!-- TODO: Name/Type filtering -->
         </div>
 
-        <div class="table-responsive">
-          <span *ngIf="!results">
-            Loading...
-          </span>
-
-          <table class="table table-hover" *ngIf="results">
-            <thead>
-              <tr>
-                <th>Asset</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Total Price</th>
-                <th>Details</th>
+        <simple-table [serverResponse]="results" (onPageChange)="pageChanged($event)">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Asset</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Total Price</th>
+              <th>Details</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-swap>
+            <ng-container [ngSwitch]="swap.orderType">
+              <tr *ngSwitchCase="SwapType.Buy">
+                <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
+                <td>{{ swap.outQuantity }}</td>
+                <td>{{ swap.unitPrice }} RVN</td>
+                <td>{{ swap.inQuantity }} RVN</td>
+                <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
               </tr>
-            </thead>
-            <tbody>
-              <ng-container *ngFor="let swap of results.swaps">
-                <ng-container [ngSwitch]="swap.orderType">
-                  <tr *ngSwitchCase="SwapType.Buy">
-                    <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
-                    <td>{{ swap.outQuantity }}</td>
-                    <td>{{ swap.unitPrice }} RVN</td>
-                    <td>{{ swap.inQuantity }} RVN</td>
-                    <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
-                  </tr>
-                  <tr *ngSwitchCase="SwapType.Sell">
-                    <td><a [routerLink]="['/asset', swap.inType]">{{ swap.inType }}</a></td>
-                    <td>{{ swap.inQuantity }}</td>
-                    <td>{{ swap.unitPrice }} RVN</td>
-                    <td>{{ swap.outQuantity }} RVN</td>
-                    <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
-                  </tr>
-                  <tr *ngSwitchCase="SwapType.Trade">
-                    <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
-                    <td>{{ swap.outQuantity }}</td>
-                    <td>{{ swap.unitPrice }} {{ swap.inType }}</td>
-                    <td>{{ swap.inQuantity }} {{ swap.inType }}</td>
-                    <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
-                  </tr>
-                </ng-container>
-              </ng-container>
-            </tbody>
-          </table>
-        </div>
+              <tr *ngSwitchCase="SwapType.Sell">
+                <td><a [routerLink]="['/asset', swap.inType]">{{ swap.inType }}</a></td>
+                <td>{{ swap.inQuantity }}</td>
+                <td>{{ swap.unitPrice }} RVN</td>
+                <td>{{ swap.outQuantity }} RVN</td>
+                <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
+              </tr>
+              <tr *ngSwitchCase="SwapType.Trade">
+                <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
+                <td>{{ swap.outQuantity }}</td>
+                <td>{{ swap.unitPrice }} {{ swap.inType }}</td>
+                <td>{{ swap.inQuantity }} {{ swap.inType }}</td>
+                <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
+              </tr>
+            </ng-container>
+          </ng-template>
+        </simple-table>
       </div>
     </div>
   </div>

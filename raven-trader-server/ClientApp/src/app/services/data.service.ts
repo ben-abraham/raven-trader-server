@@ -30,16 +30,20 @@ export class DataService {
 
   }
 
-  public queryListings(assetName: string = null, swapType: SwapType = null): Observable<DTOListingResults> {
+  public queryListings(assetName: string = null, offset=0, pageSize=25, swapType: SwapType = null): Observable<DTOListingResults> {
     let params = new HttpParams();
     params = params.append("assetName", assetName);
+    params = params.append("offset", offset.toString());
+    params = params.append("pageSize", pageSize.toString());
     params = params.append("swapType", swapType ? SwapType[swapType] : null);
     return this.http.get<DTOListingResults>('api/sitedata/listings', { params: params });
   }
 
-  public queryHistory(assetName: string = null, swapType: SwapType = null): Observable<DTOHistoryResults> {
+  public queryHistory(assetName: string = null, offset = 0, pageSize = 25, swapType: SwapType = null): Observable<DTOHistoryResults> {
     let params = new HttpParams();
     params = params.append("assetName", assetName);
+    params = params.append("offset", offset.toString());
+    params = params.append("pageSize", pageSize.toString());
     params = params.append("swapType", swapType ? SwapType[swapType] : null);
     return this.http.get<DTOHistoryResults>('api/sitedata/swaphistory', { params: params });
   }
@@ -116,18 +120,6 @@ export interface DTOSiteData {
   asset_volume: AssetLookup<DTOAssetVolume>;
 };
 
-export interface DTOListingResults {
-  swaps: DTOAssetListing[];
-  offset: number;
-  totalCount: number;
-}
-
-export interface DTOHistoryResults {
-  swaps: DTOSwap[];
-  offset: number;
-  totalCount: number;
-}
-
 export interface DTOAssetSearchResults {
   asset: string;
   children: string[];
@@ -156,4 +148,18 @@ export interface DTOParseSignedPartial {
   valid: boolean;
   result: DTOAssetListing;
 }
+
+
+export interface DTOSearchResults<T> {
+  swaps: T[];
+  offset: number;
+  totalCount: number;
+}
+
+export interface DTOListingResults extends DTOSearchResults<DTOAssetListing> {
+}
+
+export interface DTOHistoryResults extends DTOSearchResults<DTOSwap> {
+}
+
 

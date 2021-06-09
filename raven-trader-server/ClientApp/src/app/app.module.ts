@@ -13,6 +13,8 @@ import { SwapListComponent } from './swaps/swaps.component';
 
 import { DataService } from './services/data.service';
 import { AssetDetailsComponent } from './asset-details/asset-details.component';
+import { SimpleTableComponent } from './components/simple-table/simple-table.component';
+import { PaginatorComponent } from './components/paginator/paginator.component';
 
 
 @NgModule({
@@ -22,7 +24,9 @@ import { AssetDetailsComponent } from './asset-details/asset-details.component';
     HomeComponent,
     DashboardComponent,
     SwapListComponent,
-    AssetDetailsComponent
+    AssetDetailsComponent,
+    SimpleTableComponent,
+    PaginatorComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

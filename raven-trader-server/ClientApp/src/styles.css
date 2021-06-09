@@ -28,3 +28,27 @@
 .signed-partial-input {
   background-color: white !important;
 }
+
+.page-report {
+  padding: 8px 10px 0 0;
+  float: left;
+}
+
+.page-item.disabled .page-link {
+  background-color: #222 !important;
+}
+
+.page-item .page-link {
+  background-color: #000 !important;
+}
+
+.page-link.disabled {
+}
+
+/* Overrides */
+
+.table-hover tbody tr:hover {
+  background-color: #444 !important;
+  color: #6c7293 !important;
+}
+

@@ -11,6 +11,8 @@ export class SwapListComponent implements OnInit {
   SwapType: typeof SwapType = SwapType;
 
   public results: DTOListingResults;
+  public offset = 0;
+  public pageSize = 25;
 
   public constructor(public app: AppComponent,
     public dataService: DataService) { }
@@ -20,9 +22,14 @@ export class SwapListComponent implements OnInit {
   }
 
   loadData(): void {
-    this.dataService.queryListings("").subscribe(results => {
+    this.dataService.queryListings("", this.offset, this.pageSize).subscribe(results => {
       this.results = results;
     });
+  }
+
+  pageChanged(event: any) {
+    this.offset = event.first;
+    this.loadData();
   }
 
   showDetails(order: MouseEvent, listing: DTOAssetListing): void {
