@@ -96,9 +96,12 @@ namespace raven_trader_server.Controllers
 
                 //Buy/Sell perspective is reversed as always here
                 //Reverse sells to make the orders meet in the middle
-                var buyOrders = assetOrders.Where(l => l.OrderType == SwapType.Sell).ToList();
-                var sellOrders = assetOrders.Where(l => l.OrderType == SwapType.Buy).ToList();
-                var tradeOrders = assetOrders.Where(l => l.OrderType == SwapType.Trade).ToList();
+                var buyOrders = assetOrders.Where(l => l.OrderType == SwapType.Sell)
+                    .OrderBy(l => l.UnitPrice).ThenBy(l => l.InQuantity).ToList();
+                var sellOrders = assetOrders.Where(l => l.OrderType == SwapType.Buy)
+                    .OrderBy(l => l.UnitPrice).ThenBy(l => l.OutQuantity).ToList();
+                var tradeOrders = assetOrders.Where(l => l.OrderType == SwapType.Trade)
+                    .OrderBy(l => l.UnitPrice).ThenBy(l => l.InType == pa ? l.InQuantity : l.OutQuantity).ToList();
 
                 return new
                 {
