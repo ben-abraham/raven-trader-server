@@ -32,7 +32,6 @@ export class SimpleTableComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(simpleChange: SimpleChanges) {
-    console.log(simpleChange);
     if (simpleChange.serverResponse) {
       this.updateTableData();
     }
@@ -48,8 +47,6 @@ export class SimpleTableComponent implements OnInit, OnChanges {
 
     
     this.results = this.serverResponse[this.dataField];
-    console.log(this.dataField);
-    console.log(this.results);
     this.totalCount = this.serverResponse.totalCount;
     this.offset = this.serverResponse.offset;
   }
