@@ -34,6 +34,11 @@
   float: left;
 }
 
+.page-item {
+  cursor: pointer;
+  user-select: none;
+}
+
 .page-item.disabled .page-link {
   background-color: #222 !important;
 }

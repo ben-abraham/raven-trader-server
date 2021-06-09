@@ -1,84 +1,3 @@
-<!--
-<div #container [ngStyle]="style" [class]="styleClass" data-scrollselectors=".p-datatable-scrollable-body, .p-datatable-unfrozen-view .p-datatable-scrollable-body"
-     [ngClass]="{'p-datatable p-component': true,
-                'p-datatable-hoverable-rows': (rowHover||selectionMode),
-                'p-datatable-auto-layout': autoLayout,
-                'p-datatable-resizable': resizableColumns,
-                'p-datatable-resizable-fit': (resizableColumns && columnResizeMode === 'fit'),
-                'p-datatable-scrollable': scrollable,
-                'p-datatable-flex-scrollable': (scrollable && scrollHeight === 'flex'),
-                'p-datatable-responsive': responsive}">
-  <div class="p-datatable-loading-overlay p-component-overlay" *ngIf="loading && showLoader">
-    <i [class]="'p-datatable-loading-icon pi-spin ' + loadingIcon"></i>
-  </div>
-  <div *ngIf="captionTemplate" class="p-datatable-header">
-    <ng-container *ngTemplateOutlet="captionTemplate"></ng-container>
-  </div>
-  <paginator [rows]="rows" [first]="first" [totalRecords]="totalRecords" [pageLinkSize]="pageLinks" styleClass="p-paginator-top" [alwaysShow]="alwaysShowPaginator"
-               (onPageChange)="onPageChange($event)" [rowsPerPageOptions]="rowsPerPageOptions" *ngIf="paginator && (paginatorPosition === 'top' || paginatorPosition =='both')"
-               [templateLeft]="paginatorLeftTemplate" [templateRight]="paginatorRightTemplate" [dropdownAppendTo]="paginatorDropdownAppendTo" [dropdownScrollHeight]="paginatorDropdownScrollHeight"
-               [currentPageReportTemplate]="currentPageReportTemplate" [showFirstLastIcon]="showFirstLastIcon" [dropdownItemTemplate]="paginatorDropdownItemTemplate" [showCurrentPageReport]="showCurrentPageReport" [showJumpToPageDropdown]="showJumpToPageDropdown" [showPageLinks]="showPageLinks"></paginator>
-  <div class="p-datatable-wrapper" *ngIf="!scrollable">
-    <table role="grid" #table [ngClass]="tableStyleClass" [ngStyle]="tableStyle">
-      <ng-container *ngTemplateOutlet="colGroupTemplate; context {$implicit: columns}"></ng-container>
-      <thead class="p-datatable-thead">
-        <ng-container *ngTemplateOutlet="headerTemplate; context: {$implicit: columns}"></ng-container>
-      </thead>
-      <tbody class="p-datatable-tbody">
-        <ng-container *ngIf="!expandedRowTemplate && !virtualScroll">
-          <ng-template ngFor let-rowData let-rowIndex="index" [ngForOf]="(paginator && !lazy) ? ((filteredValue||value) | slice:first:(first + rows)) : (filteredValue||value)" [ngForTrackBy]="rowTrackBy">
-            <ng-container *ngTemplateOutlet="template; context: {$implicit: rowData, rowIndex: paginator ? (first + rowIndex) : rowIndex, columns: columns, editing: (editMode === 'row' && isRowEditing(rowData))}"></ng-container>
-          </ng-template>
-        </ng-container>
-        <ng-container *ngIf="!expandedRowTemplate && virtualScroll">
-          <ng-template cdkVirtualFor let-rowData let-rowIndex="index" [cdkVirtualForOf]="filteredValue||value" [cdkVirtualForTrackBy]="rowTrackBy" [cdkVirtualForTemplateCacheSize]="0">
-            <ng-container *ngTemplateOutlet="rowData ? template: loadingBodyTemplate; context: {$implicit: rowData, rowIndex: paginator ? (first + rowIndex) : rowIndex, columns: columns, editing: (editMode === 'row' && isRowEditing(rowData))}"></ng-container>
-          </ng-template>
-        </ng-container>
-        <ng-container *ngIf="expandedRowTemplate && !(frozen && frozenExpandedRowTemplate)">
-          <ng-template ngFor let-rowData let-rowIndex="index" [ngForOf]="(paginator && !lazy) ? ((filteredValue||value) | slice:first:(first + rows)) : (filteredValue||value)" [ngForTrackBy]="rowTrackBy">
-            <ng-container *ngTemplateOutlet="template; context: {$implicit: rowData, rowIndex: paginator ? (first + rowIndex) : rowIndex, columns: columns, expanded: isRowExpanded(rowData), editing: (editMode === 'row' && isRowEditing(rowData))}"></ng-container>
-            <ng-container *ngIf="isRowExpanded(rowData)">
-              <ng-container *ngTemplateOutlet="expandedRowTemplate; context: {$implicit: rowData, rowIndex: paginator ? (first + rowIndex) : rowIndex, columns: columns}"></ng-container>
-            </ng-container>
-          </ng-template>
-        </ng-container>
-        <ng-container *ngIf="frozenExpandedRowTemplate && frozen">
-          <ng-template ngFor let-rowData let-rowIndex="index" [ngForOf]="(paginator && !lazy) ? ((filteredValue||value) | slice:first:(first + rows)) : (filteredValue||value)" [ngForTrackBy]="rowTrackBy">
-            <ng-container *ngTemplateOutlet="template; context: {$implicit: rowData, rowIndex: paginator ? (first + rowIndex) : rowIndex, columns: columns, expanded: isRowExpanded(rowData), editing: (editMode === 'row' && isRowEditing(rowData))}"></ng-container>
-            <ng-container *ngIf="isRowExpanded(rowData)">
-              <ng-container *ngTemplateOutlet="frozenExpandedRowTemplate; context: {$implicit: rowData, rowIndex: paginator ? (first + rowIndex) : rowIndex, columns: columns}"></ng-container>
-            </ng-container>
-          </ng-template>
-        </ng-container>
-        <ng-container *ngIf="loading">
-          <ng-container *ngTemplateOutlet="loadingBodyTemplate; context: {$implicit: columns, frozen: frozen}"></ng-container>
-        </ng-container>
-        <ng-container *ngIf="isEmpty() && !loading">
-          <ng-container *ngTemplateOutlet="emptyMessageTemplate; context: {$implicit: columns, frozen: frozen}"></ng-container>
-        </ng-container>
-      </tbody>
-      <tfoot *ngIf="footerTemplate" class="p-datatable-tfoot">
-        <ng-container *ngTemplateOutlet="footerTemplate; context {$implicit: columns}"></ng-container>
-      </tfoot>
-    </table>
-  </div>
-  <div class="p-datatable-scrollable-wrapper" *ngIf="scrollable">
-    <div class="p-datatable-scrollable-view p-datatable-frozen-view" *ngIf="frozenColumns||frozenBodyTemplate" #scrollableFrozenView [pScrollableView]="frozenColumns" [frozen]="true" [ngStyle]="{width: frozenWidth}" [scrollHeight]="scrollHeight"></div>
-    <div class="p-datatable-scrollable-view" #scrollableView [pScrollableView]="columns" [frozen]="false" [scrollHeight]="scrollHeight" [ngStyle]="{left: frozenWidth, width: 'calc(100% - '+frozenWidth+')'}"></div>
-  </div>
-  <paginator [rows]="rows" [first]="first" [totalRecords]="totalRecords" [pageLinkSize]="pageLinks" styleClass="p-paginator-bottom" [alwaysShow]="alwaysShowPaginator"
-               (onPageChange)="onPageChange($event)" [rowsPerPageOptions]="rowsPerPageOptions" *ngIf="paginator && (paginatorPosition === 'bottom' || paginatorPosition =='both')"
-               [templateLeft]="paginatorLeftTemplate" [templateRight]="paginatorRightTemplate" [dropdownAppendTo]="paginatorDropdownAppendTo" [dropdownScrollHeight]="paginatorDropdownScrollHeight"
-               [currentPageReportTemplate]="currentPageReportTemplate" [showFirstLastIcon]="showFirstLastIcon" [dropdownItemTemplate]="paginatorDropdownItemTemplate" [showCurrentPageReport]="showCurrentPageReport" [showJumpToPageDropdown]="showJumpToPageDropdown" [showPageLinks]="showPageLinks"></paginator>
-  <div *ngIf="summaryTemplate" class="p-datatable-footer">
-    <ng-container *ngTemplateOutlet="summaryTemplate"></ng-container>
-  </div>
-  <div #resizeHelper class="p-column-resizer-helper" style="display:none" *ngIf="resizableColumns"></div>
-  <span #reorderIndicatorUp class="pi pi-arrow-down p-datatable-reorder-indicator-up" style="display:none" *ngIf="reorderableColumns"></span>
-  <span #reorderIndicatorDown class="pi pi-arrow-up p-datatable-reorder-indicator-down" style="display:none" *ngIf="reorderableColumns"></span>
-</div>
--->
 <div class="table-responsive">
   <span *ngIf="!results">
     Loading...
@@ -90,29 +9,7 @@
     </thead>
     <tbody>
       <ng-container *ngFor="let swap of results">
-        <ng-container [ngSwitch]="swap.orderType">
-          <tr *ngSwitchCase="SwapType.Buy">
-            <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
-            <td>{{ swap.outQuantity }}</td>
-            <td>{{ swap.unitPrice }} RVN</td>
-            <td>{{ swap.inQuantity }} RVN</td>
-            <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
-          </tr>
-          <tr *ngSwitchCase="SwapType.Sell">
-            <td><a [routerLink]="['/asset', swap.inType]">{{ swap.inType }}</a></td>
-            <td>{{ swap.inQuantity }}</td>
-            <td>{{ swap.unitPrice }} RVN</td>
-            <td>{{ swap.outQuantity }} RVN</td>
-            <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
-          </tr>
-          <tr *ngSwitchCase="SwapType.Trade">
-            <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
-            <td>{{ swap.outQuantity }}</td>
-            <td>{{ swap.unitPrice }} {{ swap.inType }}</td>
-            <td>{{ swap.inQuantity }} {{ swap.inType }}</td>
-            <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
-          </tr>
-        </ng-container>
+        <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: swap}"></ng-container>
       </ng-container>
     </tbody>
   </table>

@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { DataService, DTOSiteData, DTOSwap, SwapType, DTOAssetSearchResults, DTOAssetListing } from '../services/data.service';
+import { DataService, DTOSiteData, DTOSwap, SwapType, DTOAssetSearchResults, DTOAssetListing, DTOHistoryResults } from '../services/data.service';
 import { Subscribable, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { AppComponent } from '../app.component';
@@ -12,10 +12,13 @@ export class AssetDetailsComponent implements OnInit {
   SwapType: typeof SwapType = SwapType;
 
   public assetName: string;
-  public parentName: string;
 
   public assetDetails: DTOAssetSearchResults;
-  public assetHistory: DTOSwap[];
+  public assetHistory: DTOHistoryResults;
+
+
+  public historyOffset = 0;
+  public historyPageSize = 25;
 
   public constructor(public dataService: DataService,
     private app: AppComponent,
@@ -26,10 +29,6 @@ export class AssetDetailsComponent implements OnInit {
   {
     this.router.paramMap.subscribe(params => {
       this.assetName = params.get("name");
-      if (this.assetName.includes("/"))
-        this.parentName = this.assetName.split("/").slice(0, -1).join("/")
-      else
-        this.parentName = null;
       this.refresh();
     });
   }
@@ -42,14 +41,23 @@ export class AssetDetailsComponent implements OnInit {
       this.assetDetails = data;
       this.cdr.detectChanges();
     });
-    this.dataService.queryHistory(this.assetName).subscribe(data => {
-      this.assetHistory = data.swaps;
+    this.changeHistoryPage();
+  }
+
+  public changeHistoryPage() {
+    this.dataService.queryHistory(this.assetName, this.historyOffset, this.historyPageSize).subscribe(data => {
+      this.assetHistory = data;
       this.cdr.detectChanges();
     });
   }
 
   showDetails(order: MouseEvent, listing: DTOAssetListing): void {
     this.app.showDetails(listing);
+  }
+
+  historyPageChanged(event: any) {
+    this.historyOffset = event.first;
+    this.changeHistoryPage();
   }
 
 }

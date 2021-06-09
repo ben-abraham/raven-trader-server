@@ -15,6 +15,7 @@ import { DataService } from './services/data.service';
 import { AssetDetailsComponent } from './asset-details/asset-details.component';
 import { SimpleTableComponent } from './components/simple-table/simple-table.component';
 import { PaginatorComponent } from './components/paginator/paginator.component';
+import { AssetListComponent } from './assets/asset-list.component';
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import { PaginatorComponent } from './components/paginator/paginator.component';
     SwapListComponent,
     AssetDetailsComponent,
     SimpleTableComponent,
-    PaginatorComponent
+    PaginatorComponent,
+    AssetListComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -37,6 +39,7 @@ import { PaginatorComponent } from './components/paginator/paginator.component';
       { path: '', component: DashboardComponent, pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'swaps', component: SwapListComponent },
+      { path: 'assets', component: AssetListComponent },
       { path: 'asset/:name', component: AssetDetailsComponent }
     ])
   ],

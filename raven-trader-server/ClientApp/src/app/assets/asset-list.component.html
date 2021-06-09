@@ -1,0 +1,47 @@
+<h1>Asset Listings</h1>
+
+<div class="row">
+
+  <div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+
+        <div style="float: right">
+          <!-- TODO: Name/Type filtering -->
+        </div>
+
+        <simple-table [serverResponse]="results" [dataField]="'assets'"
+          [headerTemplate]="assetListHeaderTemplate" [bodyTemplate]="assetListBodyTemplate" (onPageChange)="pageChanged($event)">
+          <ng-template #assetListHeaderTemplate>
+            <tr>
+              <th>Asset</th>
+              <th>Buy Orders (Quantity)</th>
+              <th>Sell Orders (Quantity)</th>
+              <th>Trade Orders (Quantity)</th>
+              <th>Buy Now</th>
+              <th>Sell Now</th>
+            </tr>
+          </ng-template>
+          <ng-template #assetListBodyTemplate let-asset>
+            <tr>
+              <td><a [routerLink]="['/asset', asset.asset]">{{ asset.asset }}</a></td>
+              <td>{{ asset.buyOrders }} ({{ asset.buyQuantity }})</td>
+              <td>{{ asset.sellOrders }} ({{ asset.sellQuantity }})</td>
+              <td>{{ asset.tradeOrders }} ({{ asset.tradeQuantity }})</td>
+              <td>
+                <span *ngIf="!asset.minBuy">No Buy Available</span>
+                <a *ngIf="asset.minBuy" href="" (click)="showDetails($event, asset.minBuy); false">{{ asset.minBuy.inQuantity }}x @ {{ asset.minBuy.unitPrice }} RVN ea.</a>
+              </td>
+              <td>
+                <span *ngIf="!asset.maxSell">No Sell Available</span>
+                <a *ngIf="asset.maxSell" href="" (click)="showDetails($event, asset.maxSell); false">{{ asset.maxSell.outQuantity }}x @ {{ asset.maxSell.unitPrice }} RVN ea.</a>
+              </td>
+            </tr>
+          </ng-template>
+        </simple-table>
+      </div>
+    </div>
+  </div>
+
+</div>
+

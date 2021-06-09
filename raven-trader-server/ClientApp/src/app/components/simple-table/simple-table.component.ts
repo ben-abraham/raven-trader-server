@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectorRef, ChangeDetectionStrategy, ViewEncapsulation, SimpleChanges, Output, OnChanges, OnInit, EventEmitter } from '@angular/core';
+import { Component, Input, ChangeDetectorRef, ChangeDetectionStrategy, ViewEncapsulation, SimpleChanges, Output, OnChanges, OnInit, EventEmitter, TemplateRef } from '@angular/core';
 import { DTOAssetSearchResults, DTOHistoryResults, DTOListingResults, DTOSearchResults, SwapType } from '../../services/data.service';
 
 @Component({
@@ -14,8 +14,12 @@ export class SimpleTableComponent implements OnInit, OnChanges {
 
   @Output() onPageChange: EventEmitter<any> = new EventEmitter();
 
-  @Input() public columns: any[] = [];
   @Input() public serverResponse: DTOSearchResults<any>;
+
+  @Input() public dataField = "swaps";
+
+  @Input() public headerTemplate: TemplateRef<any>;
+  @Input() public bodyTemplate: TemplateRef<any>;
 
   @Input() public totalCount = 0;
   @Input() public pageSize = 20;
@@ -28,6 +32,7 @@ export class SimpleTableComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(simpleChange: SimpleChanges) {
+    console.log(simpleChange);
     if (simpleChange.serverResponse) {
       this.updateTableData();
     }
@@ -40,9 +45,11 @@ export class SimpleTableComponent implements OnInit, OnChanges {
       this.offset = 0;
       return;
     }
+
     
-    
-    this.results = this.serverResponse.swaps;
+    this.results = this.serverResponse[this.dataField];
+    console.log(this.dataField);
+    console.log(this.results);
     this.totalCount = this.serverResponse.totalCount;
     this.offset = this.serverResponse.offset;
   }

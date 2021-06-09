@@ -49,6 +49,17 @@
       </a>
     </li>
 
+    <li class="nav-item menu-items"
+        [routerLinkActive]="['active']"
+        [routerLinkActiveOptions]="{ exact: true }">
+      <a class="nav-link" [routerLink]="['/assets']">
+        <span class="menu-icon">
+          <i class="mdi mdi-format-list-bulleted-type"></i>
+        </span>
+        <span class="menu-title">Listed Assets</span>
+      </a>
+    </li>
+
     <!--
       <li class="nav-item menu-items" [routerLinkActive]="['active']">
         <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
@@ -68,7 +79,7 @@
   -->
 
     <li class="nav-item menu-items" [routerLinkActive]="['active']">
-      <a class="nav-link" [routerLink]="['/swaps']" >
+      <a class="nav-link" [routerLink]="['/swaps']">
         <span class="menu-icon">
           <i class="mdi mdi-swap-horizontal"></i>
         </span>

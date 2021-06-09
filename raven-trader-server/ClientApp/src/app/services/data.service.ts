@@ -48,6 +48,14 @@ export class DataService {
     return this.http.get<DTOHistoryResults>('api/sitedata/swaphistory', { params: params });
   }
 
+  public queryGrouped(assetName: string = null, offset = 0, pageSize = 25): Observable<DTOGroupedResults> {
+    let params = new HttpParams();
+    params = params.append("assetName", assetName);
+    params = params.append("offset", offset.toString());
+    params = params.append("pageSize", pageSize.toString());
+    return this.http.get<DTOGroupedResults>('api/sitedata/groupedlistings', { params: params });
+  }
+
   public queryAsset(assetName: string): Observable<DTOAssetSearchResults> {
     let headers = new HttpHeaders();
     headers = headers.append('Content-Type', 'application/json');
@@ -122,6 +130,7 @@ export interface DTOSiteData {
 
 export interface DTOAssetSearchResults {
   asset: string;
+  parent: string;
   children: string[];
   units: number;
   denomination: number;
@@ -149,6 +158,18 @@ export interface DTOParseSignedPartial {
   result: DTOAssetListing;
 }
 
+export interface DTOAssetGroup {
+  asset: string;
+  buyOrders: number;
+  muyQuantity: number;
+  minBuy: DTOAssetListing;
+  sellOrders: number;
+  sellQuantity: number;
+  maxSell: DTOAssetListing;
+  tradeOrders: number;
+  tradeQuantity: number;
+}
+
 
 export interface DTOSearchResults<T> {
   swaps: T[];
@@ -160,6 +181,9 @@ export interface DTOListingResults extends DTOSearchResults<DTOAssetListing> {
 }
 
 export interface DTOHistoryResults extends DTOSearchResults<DTOSwap> {
+}
+
+export interface DTOGroupedResults extends DTOSearchResults<DTOAssetGroup> {
 }
 
 

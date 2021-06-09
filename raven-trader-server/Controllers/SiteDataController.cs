@@ -69,7 +69,7 @@ namespace raven_trader_server.Controllers
 
         [HttpGet]
         [Route("groupedlistings")]
-        public JsonResult GetGrouped(string assetName, string swapType, bool groupListing = false, int pageSize = 100, int offset = 0)
+        public JsonResult GetGroupedListings(string assetName, string swapType, int pageSize = 100, int offset = 0)
         {
             if (pageSize > Constants.MAX_PAGE_SIZE) pageSize = Constants.MAX_PAGE_SIZE;
 
@@ -92,25 +92,25 @@ namespace raven_trader_server.Controllers
             {
                 var assetOrders = listQuery
                     .Where(l => l.InType == pa || l.OutType == pa)
-                    .OrderBy(l => l.UnitPrice);
+                    .OrderBy(l => l.UnitPrice).ToList();
 
+                //Buy/Sell perspective is reversed as always here
+                //Reverse sells to make the orders meet in the middle
                 var buyOrders = assetOrders.Where(l => l.OrderType == SwapType.Sell).ToList();
                 var sellOrders = assetOrders.Where(l => l.OrderType == SwapType.Buy).ToList();
                 var tradeOrders = assetOrders.Where(l => l.OrderType == SwapType.Trade).ToList();
 
-                //Buy/Sell perspective is reversed as always here
                 return new
                 {
                     Asset = pa,
                     BuyOrders = buyOrders.Count(),
                     BuyQuantity = buyOrders.Sum(o => o.OutQuantity),
-                    MinBuy = buyOrders.FirstOrDefault(),
+                    MinBuy = buyOrders.LastOrDefault(), //Last on buys (sells) to account for reverse prices
                     SellOrders = sellOrders.Count(),
                     SellQuantity = sellOrders.Sum(o => o.InQuantity),
-                    MaxSell = sellOrders.LastOrDefault(),
+                    MaxSell = sellOrders.FirstOrDefault(),
                     TradeOrders = tradeOrders.Count(),
-                    TradeQuantity = tradeOrders.Sum(o => o.InType == pa ? o.InQuantity : o.OutQuantity),
-                    Trades = tradeOrders.FirstOrDefault()
+                    TradeQuantity = tradeOrders.Sum(o => o.InType == pa ? o.InQuantity : o.OutQuantity)
                 };
             });
 
@@ -182,7 +182,14 @@ namespace raven_trader_server.Controllers
                 return new JsonResult(null);
             
             var asset_data = _rpc.GetAssetData(assetName);
-            var child_assets = _rpc.ListAssets($"{assetName}/*");
+
+            if (asset_data == null)
+                return new JsonResult(null);
+            
+            var child_assets = _rpc.ListAssets($"{assetName}/*").Union(_rpc.ListAssets($"{assetName}#*"));
+
+            var parent_asset = assetName.Any(c => Constants.ASSET_SEPARATORS.Contains(c)) ?
+                assetName.Substring(0, Constants.ASSET_SEPARATORS.Max(s => assetName.LastIndexOf(s))) : null;
 
             var assetOrders = _db.Listings.AsQueryable()
                 .Where(l => l.Active)
@@ -196,6 +203,7 @@ namespace raven_trader_server.Controllers
             return new JsonResult(new
             {
                 Asset = assetName,
+                Parent = parent_asset,
                 Children = child_assets,
                 Units = asset_data.Value<int>("units"),
                 Denomination = 1 / Math.Pow(10, asset_data.Value<int>("units")),

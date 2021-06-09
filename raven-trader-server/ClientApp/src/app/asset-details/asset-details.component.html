@@ -16,7 +16,7 @@
             <h6>Units: {{ assetDetails.units }} ({{assetDetails.denomination}} = smallest denomination)</h6>
             <h6>Re-Issuable: {{ assetDetails.reissuable ? 'Yes' : 'No' }}</h6>
             <h6 *ngIf="assetDetails.ipfs"><a target="_blank" href="https://ravencoinipfs-gateway.com/ipfs/{{ assetDetails.ipfs }}">IPFS Data</a></h6>
-            <h5 *ngIf="parentName">Parent Asset: <a [routerLink]="['/asset', parentName]">{{ parentName }}</a></h5>
+            <h5 *ngIf="assetDetails.parent">Parent Asset: <a [routerLink]="['/asset', assetDetails.parent]">{{ assetDetails.parent }}</a></h5>
             <h5 *ngIf="assetDetails.children.length > 0">{{assetDetails.children.length}} Child Assets</h5>
             <ul *ngIf="assetDetails.children.length > 0">
               <ng-container *ngFor="let child of assetDetails.children">
@@ -29,46 +29,43 @@
         </div>
 
 
-        <h5 *ngIf="!assetHistory">
-          Loading History...
-        </h5>
-        <div class="table-responsive" *ngIf="assetHistory">
-          <h4 class="card-title">Swap History</h4>
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>Block</th>
-                <th>Type</th>
-                <th>Order</th>
-                <th>Total</th>
+        <simple-table [serverResponse]="assetHistory" [pageSize]="historyPageSize"
+            [headerTemplate]="historyHeaderTemplate" [bodyTemplate]="historyBodyTemplate" (onPageChange)="historyPageChanged($event)">
+          <ng-template #historyHeaderTemplate>
+            <tr>
+              <th>Block</th>
+              <th>Type</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Total</th>
+            </tr>
+          </ng-template>
+          <ng-template #historyBodyTemplate let-swap>
+            <ng-container [ngSwitch]="swap.orderType">
+              <tr *ngSwitchCase="SwapType.Buy">
+                <td>{{ swap.block }}</td>
+                <td>{{ SwapType[swap.orderType] }}</td>
+                <td>{{ swap.inQuantity | number:'1.0-8' }}x</td>
+                <td>{{ swap.unitPrice | number:'1.0-8' }} RVN</td>
+                <td>{{ swap.inQuantity | number:'1.0-8' }} RVN</td>
               </tr>
-            </thead>
-            <tbody>
-              <ng-container *ngFor="let swap of assetHistory">
-                <ng-container [ngSwitch]="swap.orderType">
-                  <tr *ngSwitchCase="SwapType.Buy">
-                    <td>{{ swap.block }}</td>
-                    <td>{{ SwapType[swap.orderType] }}</td>
-                    <td>{{ swap.outQuantity | number:'1.0-8' }}x @ {{ swap.unitPrice | number:'1.0-8' }} RVN ea.</td>
-                    <td>{{ swap.inQuantity | number:'1.0-8' }} RVN</td>
-                  </tr>
-                  <tr *ngSwitchCase="SwapType.Sell">
-                    <td>{{ swap.block }}</td>
-                    <td>{{ SwapType[swap.orderType] }}</td>
-                    <td>{{ swap.inQuantity | number:'1.0-8' }}x @ {{ swap.unitPrice | number:'1.0-8' }} RVN ea.</td>
-                    <td>{{ swap.outQuantity | number:'1.0-8' }} RVN</td>
-                  </tr>
-                  <tr *ngSwitchCase="SwapType.Trade">
-                    <td>{{ swap.block }}</td>
-                    <td>{{ SwapType[swap.orderType] }}</td>
-                    <td>{{ swap.outQuantity | number:'1.0-8' }}x @ {{ swap.unitPrice | number:'1.0-8' }}x {{ swap.inType }} ea.</td>
-                    <td>{{ swap.inQuantity | number:'1.0-8' }}x {{ swap.inType }}</td>
-                  </tr>
-                </ng-container>
-              </ng-container>
-            </tbody>
-          </table>
-        </div>
+              <tr *ngSwitchCase="SwapType.Sell">
+                <td>{{ swap.block }}</td>
+                <td>{{ SwapType[swap.orderType] }}</td>
+                <td>{{ swap.outQuantity | number:'1.0-8' }}x</td>
+                <td>{{ swap.unitPrice | number:'1.0-8' }} RVN</td>
+                <td>{{ swap.outQuantity | number:'1.0-8' }} RVN</td>
+              </tr>
+              <tr *ngSwitchCase="SwapType.Trade">
+                <td>{{ swap.block }}</td>
+                <td>{{ SwapType[swap.orderType] }}</td>
+                <td>{{ swap.outType === assetName ? swap.outQuantity : swap.inQuantity | number:'1.0-8' }}</td>
+                <td>{{ swap.unitPrice | number:'1.0-8' }}</td>
+                <td>{{ swap.outType === assetName ? swap.inQuantity : swap.outQuantity | number:'1.0-8' }}x {{ swap.outType === assetName ? swap.inType : swap.outType }}</td>
+              </tr>
+            </ng-container>
+          </ng-template>
+        </simple-table>
       </div>
     </div>
   </div>
@@ -85,8 +82,8 @@
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Unit Price</th>
                 <th>Quantity</th>
+                <th>Unit Price</th>
                 <th>Total</th>
                 <th>Hex</th>
               </tr>
@@ -94,9 +91,9 @@
             <tbody>
               <ng-container *ngFor="let swap of assetDetails.buys">
                 <ng-container [ngSwitch]="swap.orderType">
-                  <tr *ngSwitchCase="SwapType.Sell">
-                    <td>{{ swap.unitPrice | number:'1.0-8' }} RVN</td>
+                  <tr *ngSwitchCase="SwapType.Sell"> <!-- Intentional -->
                     <td>{{ swap.inQuantity | number:'1.0-8' }}x</td>
+                    <td>{{ swap.unitPrice | number:'1.0-8' }} RVN</td>
                     <td>{{ swap.outQuantity | number:'1.0-8' }} RVN</td>
                     <td><a href="" (click)="showDetails($event, swap); false">Hex</a></td>
                   </tr>
@@ -109,8 +106,8 @@
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Unit Price</th>
                 <th>Quantity</th>
+                <th>Unit Price</th>
                 <th>Total</th>
                 <th>Hex</th>
               </tr>
@@ -118,10 +115,10 @@
             <tbody>
               <ng-container *ngFor="let swap of assetDetails.sells">
                 <ng-container [ngSwitch]="swap.orderType">
-                  <tr *ngSwitchCase="SwapType.Sell">
+                  <tr *ngSwitchCase="SwapType.Buy"> <!-- Intentional -->
+                    <td>{{ swap.outQuantity | number:'1.0-8' }}x</td>
                     <td>{{ swap.unitPrice | number:'1.0-8' }} RVN</td>
-                    <td>{{ swap.inQuantity | number:'1.0-8' }}x</td>
-                    <td>{{ swap.outQuantity | number:'1.0-8' }} RVN</td>
+                    <td>{{ swap.inQuantity | number:'1.0-8' }} RVN</td>
                     <td><a href="" (click)="showDetails($event, swap); false">Hex</a></td>
                   </tr>
                 </ng-container>
@@ -147,8 +144,8 @@
             <thead>
               <tr>
                 <th>Asset</th>
-                <th>Unit Price</th>
                 <th>Quantity</th>
+                <th>Unit Price</th>
                 <th>Total</th>
                 <th>Hex</th>
               </tr>
@@ -162,9 +159,9 @@
                         {{ swap.outType === assetName ? swap.inType : swap.outType }}
                       </a>
                     </td>
+                    <td>{{ swap.outType === assetName ? swap.outQuantity : swap.inQuantity | number:'1.0-8' }}x</td>
                     <td>{{ swap.unitPrice | number:'1.0-8' }}</td>
                     <td>{{ swap.outType === assetName ? swap.inQuantity : swap.outQuantity | number:'1.0-8' }}</td>
-                    <td>{{ swap.outType === assetName ? swap.outQuantity : swap.inQuantity | number:'1.0-8' }}</td>
                     <td><a href="" (click)="showDetails($event, swap); false">Hex</a></td>
                   </tr>
                 </ng-container>

@@ -10,9 +10,10 @@
           <!-- TODO: Name/Type filtering -->
         </div>
 
-        <simple-table [serverResponse]="results" (onPageChange)="pageChanged($event)">
-          <ng-template pTemplate="header">
+        <simple-table [serverResponse]="results" [headerTemplate]="swapHeaderTemplate" [bodyTemplate]="swapBodyTemplate" (onPageChange)="pageChanged($event)">
+          <ng-template #swapHeaderTemplate>
             <tr>
+              <th>Type</th>
               <th>Asset</th>
               <th>Quantity</th>
               <th>Unit Price</th>
@@ -20,9 +21,10 @@
               <th>Details</th>
             </tr>
           </ng-template>
-          <ng-template pTemplate="body" let-swap>
+          <ng-template #swapBodyTemplate let-swap>
             <ng-container [ngSwitch]="swap.orderType">
               <tr *ngSwitchCase="SwapType.Buy">
+                <td>{{ SwapType[swap.orderType] }}</td>
                 <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
                 <td>{{ swap.outQuantity }}</td>
                 <td>{{ swap.unitPrice }} RVN</td>
@@ -30,6 +32,7 @@
                 <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
               </tr>
               <tr *ngSwitchCase="SwapType.Sell">
+                <td>{{ SwapType[swap.orderType] }}</td>
                 <td><a [routerLink]="['/asset', swap.inType]">{{ swap.inType }}</a></td>
                 <td>{{ swap.inQuantity }}</td>
                 <td>{{ swap.unitPrice }} RVN</td>
@@ -37,6 +40,7 @@
                 <td><a href="" (click)="showDetails($event, swap); false">Details + Hex</a></td>
               </tr>
               <tr *ngSwitchCase="SwapType.Trade">
+                <td>{{ SwapType[swap.orderType] }}</td>
                 <td><a [routerLink]="['/asset', swap.outType]">{{ swap.outType }}</a></td>
                 <td>{{ swap.outQuantity }}</td>
                 <td>{{ swap.unitPrice }} {{ swap.inType }}</td>

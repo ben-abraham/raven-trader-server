@@ -11,6 +11,8 @@ namespace raven_trader_server
 
         public static string SINGLE_ANYONECANPAY = "[SINGLE|ANYONECANPAY]";
 
+        public static char[] ASSET_SEPARATORS = new[] { '/', '#' };
+
         public const string VOUT_TYPE_NONSTANDARD = "nonstandard";
         public const string VOUT_TYPE_PUBKEY = "pubkey";
         public const string VOUT_TYPE_PUBKEYHASH = "pubkeyhash";
