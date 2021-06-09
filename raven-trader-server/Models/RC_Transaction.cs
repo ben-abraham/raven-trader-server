@@ -54,10 +54,10 @@ namespace raven_trader_server.Models
             dynamic swap_setup_src_vout = swap_setup_src.vout[(int)swap_setup_vin.vout];
             string txid = DecodedTransaction.txid.ToString();
 
-            string in_type = swap_setup_src_vout?.scriptPubKey?.type?.ToString();
-            string out_Type = swap_setup_vout?.scriptPubKey?.type?.ToString();
+            var in_type = (swap_setup_src_vout?.scriptPubKey?.asset != null) ? "asset" : "rvn";
+            var out_Type = (swap_setup_vout?.scriptPubKey?.asset != null) ? "asset" : "rvn";
 
-            if (in_type == Constants.VOUT_TYPE_TRANSFER_ASSET && out_Type == Constants.VOUT_TYPE_TRANSFER_ASSET)
+            if (in_type == "asset" && out_Type == "asset")
             {
                 Swap = new RC_Swap()
                 {
@@ -71,7 +71,7 @@ namespace raven_trader_server.Models
                 };
                 return true;
             }
-            else if (out_Type == Constants.VOUT_TYPE_TRANSFER_ASSET)
+            else if (out_Type == "asset")
             {
                 Swap = new RC_Swap()
                 {
@@ -85,7 +85,7 @@ namespace raven_trader_server.Models
                 };
                 return true;
             }
-            else if (in_type == Constants.VOUT_TYPE_TRANSFER_ASSET)
+            else if (in_type == "asset")
             {
                 Swap = new RC_Swap()
                 {

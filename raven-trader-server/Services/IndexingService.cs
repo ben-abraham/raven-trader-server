@@ -181,8 +181,8 @@ namespace raven_trader_server.Services
                 {
                     foundSwaps.Add(swap);
 
-                    addAssetVolume(swap.InType, swap.InQuantity, true);
-                    addAssetVolume(swap.InType, swap.InQuantity, true);
+                    if (swap.InType != "rvn") addAssetVolume(swap.InType, swap.InQuantity, true);
+                    if (swap.OutType != "rvn") addAssetVolume(swap.OutType, swap.OutQuantity, true);
                 }
 
                 foreach(var vin in block_tx.vin)
