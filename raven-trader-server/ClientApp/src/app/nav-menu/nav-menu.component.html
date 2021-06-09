@@ -112,4 +112,15 @@
       </div>
     </li>
 
+    <li class="nav-item menu-items"
+        [routerLinkActive]="['active']"
+        [routerLinkActiveOptions]="{ exact: true }">
+      <a class="nav-link" [routerLink]="['/help']">
+        <span class="menu-icon">
+          <i class="mdi mdi-frequently-asked-questions"></i>
+        </span>
+        <span class="menu-title">FAQ / Help</span>
+      </a>
+    </li>
+
   </ul>
