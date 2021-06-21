@@ -134,6 +134,14 @@
           <span id="modalSwapFooter" class="text-success" style="float: left"></span>
 
           <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnDismissAddSwap">Close</button>
+          <div *ngIf="previewMode" class="dropdown">
+            <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Open on ...
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="http://ravenswap.net?sp={{ signedPartialEntry }}" target="_blank">https://ravenswap.net</a>
+            </div>
+          </div>
           <button *ngIf="previewMode" type="button" class="btn btn-primary" (click)="delayedCopy(250)">Copy Hex</button>
           <button *ngIf="!previewMode" type="button" class="btn btn-primary {{ signedPartialData ? '' : 'disabled' }}" (click)="submitPartial()">{{ signedPartialData ? 'Submit!' : 'Invalid' }}</button>
         </div>

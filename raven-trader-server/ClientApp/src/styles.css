@@ -57,3 +57,6 @@
   color: #6c7293 !important;
 }
 
+.dropdown-item:hover, .dropdown-item:focus {
+  color: #DDD !important;
+}
