@@ -11,12 +11,17 @@ import { HomeComponent } from './home/home.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { SwapListComponent } from './swaps/swaps.component';
 
-import { DataService } from './services/data.service';
+import { AssetListComponent } from './assets/asset-list.component';
 import { AssetDetailsComponent } from './asset-details/asset-details.component';
+
 import { SimpleTableComponent } from './components/simple-table/simple-table.component';
 import { PaginatorComponent } from './components/paginator/paginator.component';
-import { AssetListComponent } from './assets/asset-list.component';
+
 import { DocumentationComponent } from './documentation/documentation.component';
+
+
+import { DataService } from './services/data.service';
+import { SafeUrlPipe } from './services/safe-url.pipe';
 
 
 @NgModule({
@@ -30,7 +35,8 @@ import { DocumentationComponent } from './documentation/documentation.component'
     SimpleTableComponent,
     PaginatorComponent,
     AssetListComponent,
-    DocumentationComponent
+    DocumentationComponent,
+    SafeUrlPipe
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

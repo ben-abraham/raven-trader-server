@@ -139,6 +139,7 @@
               Open on ...
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" [href]="'rvnswap://' + signedPartialEntry | safeUrl">Raven-Trader-Pro/Local Wallet (if configured)</a>
               <a class="dropdown-item" href="http://ravenswap.net?sp={{ signedPartialEntry }}" target="_blank">https://ravenswap.net</a>
             </div>
           </div>
